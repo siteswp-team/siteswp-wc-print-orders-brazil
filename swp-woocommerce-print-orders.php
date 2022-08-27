@@ -1,14 +1,17 @@
 <?php
 /**
- * Plugin Name: SitesWP Etiquetas de Pedidos e Declaração de Conteúdo Correios Brasil
- * Plugin URI:  https://github.com/siteswp-team/siteswp-woocommerce-print-orders-brazil
- * Description: Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do BRasil, para pedidos gerados no WooCommerce.
- * Author:      SitesWP
- * Author       URI: https://siteswp.com.br/
- * Version:     1.0.0
- * License:     GPLv2 or later
- * Text Domain: swp-woocommerce-print-orders
- * Domain Path: languages/
+ * Plugin Name:       SitesWP Etiquetas de Pedidos e Declaração de Conteúdo Correios Brasil
+ * Plugin URI:        https://github.com/siteswp-team/siteswp-woocommerce-print-orders-brazil
+ * Description:       Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do BRasil, para pedidos gerados no WooCommerce.
+ * Author:            SitesWP
+ * Author URI:        https://siteswp.com.br/
+ * Version:           1.0.0
+ * Requires at least: 5.2
+ * Tested up to:      6.0
+ * Requires PHP:      7.2
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Tags:              woocommerce, shipping, correios, brasil
  *
  */
 
@@ -21,7 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 
  */
 add_action( 'admin_footer-edit.php', array('SWP_Print_Orders', 'footer') );             // Adicionar botões de impressão nas páginas de pedido
-add_action( 'wp_ajax_swp_print_orders', 'swp_print_orders_ajax_init' );                 // Iniciar página de impressão
 add_filter( 'woocommerce_general_settings', 'swp_print_orders_add_shop_cnpj_cpf' );     // Adicionar CPF/CNPJ para opções da loja
 
 /**
@@ -49,13 +51,10 @@ function swp_print_orders_add_shop_cnpj_cpf( $settings ){
 };
 
 /**
- * Inicializar classe e exibir página de preview
+ * Inicializar classe
  * 
  */
-function swp_print_orders_ajax_init(){
-    $swp_print_orders = new SWP_Print_Orders();
-    $swp_print_orders->ajax();
-}
+$swp_print_orders = new SWP_Print_Orders();
 
 /**
  * Classe principal
@@ -80,12 +79,6 @@ class SWP_Print_Orders {
      * 
      */
     protected $locale = array();
-    
-    /**
-     * Ação do formulário, que irá recarregar a página com as novas configurações, é o mesmo name da action ajax
-     * 
-     */
-    private static $action = 'swp_print_orders';
     
     /**
      * Qual elemento será impresso:
@@ -280,7 +273,41 @@ class SWP_Print_Orders {
     
     protected $orders = array();
     
-    function __construct(){
+    public function __construct(){
+        add_action( 'admin_menu', [$this, 'admin_menu'], 60 );
+        add_action( 'admin_enqueue_scripts', [$this, 'setup_init'], 1 );
+        add_action( 'admin_enqueue_scripts', [$this, 'enqueues'], 10 );
+    }
+
+    public function admin_menu( $hook ){
+        add_submenu_page(
+            'woocommerce'
+            , 'Imprimir Etiquetas'
+            , 'Imprimir Etiquetas'
+            , 'manage_options'
+            , 'correios_print_orders'
+            , [$this, 'render_page']
+        );
+    }
+
+    public function setup_init( $hook ){
+        if( $hook == 'woocommerce_page_correios_print_orders' ){
+            $this->setup();
+        }
+    }
+
+    public function enqueues( $hook ){
+        if( $hook == 'woocommerce_page_correios_print_orders' ){
+            echo $this->css_base();
+            echo $this->css_preview();
+            echo $this->css_print();
+            if( !empty($this->config['css']['file']) ){
+                echo "<link rel='stylesheet' href='{$this->config['css']['file']}' />";
+            }
+        }
+    }
+
+    function setup(){
         global $wp_locale;
         $this->locale = $wp_locale;
         
@@ -355,38 +382,24 @@ class SWP_Print_Orders {
         $this->set_sender();
     }
     
-    public function ajax(){
-        
-        ?><!DOCTYPE HTML>
-        <html lang="pt_BR">
-        <head>
-            <meta charset="UTF-8">
-            <title><?php echo $this->admin_title; ?></title>
-            <?php
-            echo $this->css_base();
-            echo $this->css_preview();
-            echo $this->css_print();
-            if( !empty($this->config['css']['file']) ){
-                echo "<link rel='stylesheet' href='{$this->config['css']['file']}' />";
-            }
-            ?>
-        </head>
-        <body>
-            <h1 class="no-print"><?php echo $this->admin_title; ?></h1>
+    public function render_page(){
+        ?>
+        <div class="wrap" id="swp-print-orders">
+            <h2 class="no-print"><?php echo $this->admin_title; ?></h2>
             
-            <form action="<?php echo admin_url( 'admin-ajax.php' ); ?>" method="get" class="print-config-form no-print">
-                <input type="hidden" name="action" value="<?php echo self::$action; ?>" />
-                <input type="hidden" name="ids" value="<?php echo implode(',', $this->order_ids); ?>" />
+            <form action="" method="get" class="print-config-form no-print">
+                <input type="hidden" name="page" value="correios_print_orders" />
+                <input type="hidden" name="oid" value="<?php echo implode(',', $this->order_ids); ?>" />
                 
                 <?php
                 switch( $this->print_action ){
                     case 'invoice':
-                        echo '<h2>Imprimindo declaração de conteúdo</h2>';
+                        echo '<h3>Imprimindo declaração de conteúdo</h3>';
                         break;
 
                     case 'order_slip':
                     default:
-                        echo '<h2>Imprimindo etiquetas de postagem dos correios</h2>';
+                        echo '<h3>Imprimindo etiquetas de postagem dos correios</h3>';
                         break;
                 }
                 ?>
@@ -397,14 +410,14 @@ class SWP_Print_Orders {
                     <?php if( empty($this->print_action) || $this->print_action == 'order_slip' ){ ?>
                     <fieldset>
                         <legend>Offset:</legend>
-                        <p>Pular <input type="number" name="offset" value="<?php echo $this->offset; ?>" size="2" min="0" max="<?php echo (int)$this->per_page - 1; ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip">atualizar</button></p>
+                        <p>Pular <input type="number" name="offset" value="<?php echo $this->offset; ?>" size="2" min="0" max="<?php echo (int)$this->per_page - 1; ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
                     </fieldset>
                     <?php } ?>
                 </div>
             </form>
             
             <div class="preview-label no-print">
-                <p><a href="javascript: window.print();" class="btn btn-print">IMPRIMIR</a></p>
+                <p><a href="javascript: window.print();" class="button-primary btn-print">IMPRIMIR</a></p>
                 <h2 id="preview-title">Visualização:</h2>
                 <p>As linhas pontilhadas vermelhas não serão impressas.</p>
             </div>
@@ -433,9 +446,7 @@ class SWP_Print_Orders {
                 echo '</pre></div>';
             }
             ?>
-            
-        </body>
-        </html>
+        </div>
         <?php
         
         die();
@@ -482,16 +493,16 @@ class SWP_Print_Orders {
         ?>
         <fieldset>
             <legend>Escolha o tipo:</legend>
-            <button type="submit" name="print_action" value="order_slip" id="print-btn-order-slip">Etiquetas</button>
-            <button type="submit" name="print_action" value="invoice" id="print-btn-invoice">Declaração</button>
+            <button type="submit" name="print_action" value="order_slip" class="button-primary" id="print-btn-order-slip">Etiquetas</button>
+            <button type="submit" name="print_action" value="invoice" class="button-primary" id="print-btn-invoice">Declaração</button>
         </fieldset>
         <?php
     }
     
     protected function set_orders(){
         
-        if( isset($_GET['ids']) ){
-            $this->order_ids = explode(',', $_GET['ids']);
+        if( isset($_GET['oid']) ){
+            $this->order_ids = explode(',', $_GET['oid']);
         }
         
         foreach( $this->order_ids as $id ){
@@ -942,7 +953,7 @@ class SWP_Print_Orders {
             return;
         }
         
-        $url = add_query_arg(array('action' => self::$action), admin_url('admin-ajax.php'));
+        $url = add_query_arg(array('page' => 'correios_print_orders'), admin_url('admin.php'));
         ?>
         <script type="text/javascript">
             jQuery(document).ready(function($){
@@ -965,7 +976,7 @@ class SWP_Print_Orders {
                     $('input:checkbox[name="post[]"]:checked').each(function() {
                         ids_arr.push(this.value);
                     });
-                    var url = updateQueryStringParameter( $('#excs-print-orders-button').attr('href'), 'ids', ids_arr.join(',') );
+                    var url = updateQueryStringParameter( $('#excs-print-orders-button').attr('href'), 'oid', ids_arr.join(',') );
                     $('#excs-print-orders-button').attr('href', url);
                 });
                 $('<a href="<?php echo $url; ?>" class="button" target="_blank" id="excs-print-orders-button">Imprimir Pedidos Selecionados</a>').insertAfter('#post-query-submit');
@@ -974,13 +985,13 @@ class SWP_Print_Orders {
                 if( $('.column-order_number .excs-order-items').length ){
                     $('.column-order_number .excs-order-items').each(function( index ){
                         var id = $(this).closest('tr').attr('id').replace('post-', '');
-                        $('<a href="<?php echo $url; ?>&ids=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual">Etiqueta </a>').insertAfter( $(this) );
+                        $('<a href="<?php echo $url; ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual">Etiqueta </a>').insertAfter( $(this) );
                     });
                 }
                 else{
                     $('.order-preview').each(function( index ){
                         var id = $(this).closest('tr').attr('id').replace('post-', '');
-                        $('<a href="<?php echo $url; ?>&ids=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual"></a>').insertAfter( $(this) );
+                        $('<a href="<?php echo $url; ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual"></a>').insertAfter( $(this) );
                     });
                 }
             });
@@ -1032,12 +1043,13 @@ class SWP_Print_Orders {
         ?>
         <style type="text/css" id="css-base">
         /* CSS common, both print and preview */
-        body {
+        #swp-print-orders {
             font-family: arial, sans-serif;
             font-size: 10.5pt;
         }
         
         .paper {
+            background-color: #fff;
             width: <?php echo $this->paper['width']; ?>mm;
             height: <?php echo $this->paper['height']; ?>mm;
             margin: 10px auto;
@@ -1063,6 +1075,7 @@ class SWP_Print_Orders {
             display: inline-block;
             font-size: 10pt;
             text-align: center;
+            line-height: 11pt;
         }
         
         .aviso {
@@ -1079,7 +1092,14 @@ class SWP_Print_Orders {
         }
         
         .empty {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .empty span {
+            padding: 4mm;
+            border: 1px dashed #000;
+            border-radius: 2mm;
         }
         
         hr {
@@ -1212,6 +1232,7 @@ class SWP_Print_Orders {
             color: #aaa;
             padding: 2mm;
             font-size: 8pt;
+            line-height: 11pt;
         }
         .correios-blank .inner .declarado {
             font-size: 10px;
@@ -1268,6 +1289,7 @@ class SWP_Print_Orders {
         .assinatura-box {
             position: relative;
             font-size: 9pt;
+            line-height: 9pt;
         }
         .assinatura-row {
             display: flex;
@@ -1330,6 +1352,7 @@ class SWP_Print_Orders {
             font-size: 8.5pt;
             height: 24mm;
             padding: 0 0 2mm;
+            line-height: 11pt;
         }
         .destinatario .address .name {
             font-weight: bold;
@@ -1347,6 +1370,7 @@ class SWP_Print_Orders {
             padding-top: 1mm;
             position: relative;
             display: flex;
+            line-height: 9.5pt;
         }
         .remetente .address {
             flex: 1;
@@ -1401,10 +1425,6 @@ class SWP_Print_Orders {
         ?>
         <style type="text/css" id="css-preview">
         /* CSS preview only */
-        body {
-            margin: 20px auto;
-            width: 250mm;
-        }
         
         .paper {
             outline: 1px dashed green;
@@ -1423,69 +1443,30 @@ class SWP_Print_Orders {
             text-align: center;
         }
 
-        h1 {
-            font-weight: normal;
-        }
-
-        h2 {
+        #swp-print-orders h3 {
             margin-bottom: 0;
         }
 
-        h2 + p {
+        #swp-print-orders h3 + p {
             margin-top: 0;
         }
         
-        fieldset {
+        #swp-print-orders fieldset {
             border: 1px solid #0085ba;
             margin: 0;
+            padding: 10px;
             flex: 1;
-            min-width: 50%;
+            min-width: 45%;
         }
         
-        fieldset p {
+        #swp-print-orders fieldset p {
             margin: 0;
         }
         
-        button, .btn {
-            display: inline-block;
-            text-decoration: none;
-            font-size: 13px;
-            margin: 0;
-            padding: 7px 12px 6px;
-            cursor: pointer;
-            border-width: 1px;
-            border-style: solid;
-            -webkit-appearance: none;
-            -webkit-border-radius: 3px;
-            border-radius: 3px;
-            white-space: nowrap;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-            background: #0085ba;
-            border-color: #0073aa #006799 #006799;
-            -webkit-box-shadow: 0 1px 0 #006799;
-            box-shadow: 0 1px 0 #006799;
-            color: #fff;
-            text-decoration: none;
-            text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
-        }
-        
-        .btn-print {
+        #swp-print-orders .btn-print {
             background-color: green;
-            font-size: 22px;
-            padding: 9px 14px 6px;
-        }
-        
-        input[type=text], input[type=number]{
-            border: 1px solid #ddd;
-            box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
-            background-color: #fff;
-            color: #32373c;
-            line-height: 26px;
-            text-align: right;
-            outline: none;
-            transition: 0.05s border-color ease-in-out;
+            font-size: 18px;
+            padding: 4px 14px 1px
         }
         
         </style>
@@ -1528,6 +1509,7 @@ class SWP_Print_Orders {
                 background: initial;
                 page-break-after: always;
                 overflow: hidden;
+                outline: none;
             }
             
             .order {
@@ -1538,12 +1520,37 @@ class SWP_Print_Orders {
             .empty span {
                 display: none;
             }
+
+            .inner {
+                color: #eee !important;
+            }
             
             .no-print {
                 display: none;
             }
             
             .empty-data {
+                display: none;
+            }
+
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                width: auto !important;
+            }
+            #wpcontent,
+            #wpbody-content,
+            #swp-print-orders {
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                width: auto !important;
+                float: none !important;
+            }
+
+            #adminmenumain,
+            #wpadminbar {
                 display: none;
             }
         }
@@ -1601,7 +1608,7 @@ abstract class SWP_Print_Order_Label {
         return $this->label;
     }
 
-    function set_shop_data(){
+    public function set_shop_data(){
         $shop_keys = array(
             'blogname',
             'woocommerce_store_address',
