@@ -273,6 +273,10 @@ class SWP_Print_Orders {
     
     protected $orders = array();
     
+    /**
+     * O primeiro 'admin_enqueue_scripts' é utilizado para o setup inicial das informações
+     * 
+     */
     public function __construct(){
         add_action( 'admin_menu', [$this, 'admin_menu'], 60 );
         add_action( 'admin_enqueue_scripts', [$this, 'setup_init'], 1 );
@@ -539,7 +543,6 @@ class SWP_Print_Orders {
             $address = $this->get_address( $order );
             // guardar informações de endereço para serem usadas no invoice
             $order->address_print = $address;
-            //pre($address);
             
             // guardar o pedido em orders
             $this->orders[ $id ] = $order;
@@ -596,7 +599,6 @@ class SWP_Print_Orders {
                     $total++;
                 }
             }
-            //pal($total);
         echo '</div>';
     }
     
@@ -619,9 +621,6 @@ class SWP_Print_Orders {
         
         $order_data = $order->get_data();
         $order_meta_data = $order->get_meta_data();
-        //pre($order_data, 'order_data', false);
-        //pre($order_meta_data, 'order_meta_data', false);
-        //pre($order_data['shipping'], '$order_data[shipping]', false);
         
         if( empty( $order_data['shipping']) ){
             $number       = $this->get_address_meta_data( $order_meta_data, '_billing_number' );
@@ -740,12 +739,6 @@ class SWP_Print_Orders {
                 'year'     => date('Y'),
             ),
         );
-        //pre($order, 'order', false);
-        //pre($order->get_total(), 'get_total', true);
-        //pre($invoice_info);
-        //pre($this->store_info);
-        //pre($order->address_print);
-        //pre($this->locale);
         
         $group_title    = $this->invoice_group_name;
         $quantity_total = 0;
@@ -773,8 +766,6 @@ class SWP_Print_Orders {
             $weight_total = round($weight_total);
         }
         $order_items = apply_filters( 'swp_print_orders_invoice_order_items', $order_items );
-        //pre($subtotal, 'subtotal');
-        //pre($order_items, 'order_items');
         
         ob_start();
         ?>
@@ -1614,6 +1605,8 @@ class SWP_Print_Orders {
 
 /**
  * Classe base para cada etiqueta individual
+ * 
+ * Cada modelo de etiqueta deverá extender esta classe e definir o método set_label() para o output da etiqueta indiivudal.
  * 
  */
 abstract class SWP_Print_Order_Label {
