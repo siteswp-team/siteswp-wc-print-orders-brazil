@@ -1274,6 +1274,9 @@ class SWP_Print_Orders {
             font-size: 8pt;
             line-height: 11pt;
         }
+        .correios-blank .inner > div {
+            display: none;
+        }
         .correios-blank .inner .declarado {
             font-size: 10px;
         }
