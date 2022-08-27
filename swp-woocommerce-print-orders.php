@@ -386,70 +386,97 @@ class SWP_Print_Orders {
         ?>
         <div class="wrap" id="swp-print-orders">
             <h2 class="no-print"><?php echo $this->admin_title; ?></h2>
-            
-            <form action="" method="get" class="print-config-form no-print">
-                <input type="hidden" name="page" value="correios_print_orders" />
-                <input type="hidden" name="oid" value="<?php echo implode(',', $this->order_ids); ?>" />
-                
-                <?php
-                switch( $this->print_action ){
-                    case 'invoice':
-                        echo '<h3>Imprimindo declaração de conteúdo</h3>';
-                        break;
 
-                    case 'order_slip':
-                    default:
-                        echo '<h3>Imprimindo etiquetas de postagem dos correios</h3>';
-                        break;
-                }
-                ?>
-                
-                <div class="fieldsets">
-                    <?php $this->print_action_bar(); ?>
-                    
-                    <?php if( empty($this->print_action) || $this->print_action == 'order_slip' ){ ?>
-                    <fieldset>
-                        <legend>Offset:</legend>
-                        <p>Pular <input type="number" name="offset" value="<?php echo $this->offset; ?>" size="2" min="0" max="<?php echo (int)$this->per_page - 1; ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
-                    </fieldset>
-                    <?php } ?>
-                </div>
-            </form>
-            
-            <div class="preview-label no-print">
-                <p><a href="javascript: window.print();" class="button-primary btn-print">IMPRIMIR</a></p>
-                <h2 id="preview-title">Visualização:</h2>
-                <p>As linhas pontilhadas vermelhas não serão impressas.</p>
-            </div>
-            
             <?php
-            switch( $this->print_action ){
-                    
-                case 'invoice':
-                    $this->print_invoices();
-                    break;
-                
-                case 'order_slip':
-                default:
-                    $this->print_pages();
-                    break;
+            if( empty($this->order_ids) ){
+                $this->help();
             }
-            ?>
-            
-            
-            <?php
-            if( $this->debug == true ){
-                echo '<div class="no-print"><pre>';
-                print_r( $this->config );
-                echo '<hr>';
-                print_r( $this );
-                echo '</pre></div>';
+            else{
+                $this->render_form();
             }
             ?>
         </div>
         <?php
         
         die();
+    }
+
+    protected function help(){
+        ?>
+        <div>
+            <p>Acesse a lista de pedidos e selecione quais vocês deseja imprimir.</p>
+            <p>
+                Você pode selecionar múltiplos pedidos: <br>
+                <img src="<?php echo $this->plugin_url; ?>/assets/img/ajuda-1.gif" alt="" class="help-img" />
+            </p>
+            <p>
+                Ou pode imprimir pedidos individualmente: <br>
+                <img src="<?php echo $this->plugin_url; ?>/assets/img/ajuda-2.gif" alt="" class="help-img" />
+            </p>
+        </div>
+        <?php
+    }
+
+    protected function render_form(){
+        ?>
+        <form action="" method="get" class="print-config-form no-print">
+            <input type="hidden" name="page" value="correios_print_orders" />
+            <input type="hidden" name="oid" value="<?php echo implode(',', $this->order_ids); ?>" />
+            
+            <?php
+            switch( $this->print_action ){
+                case 'invoice':
+                    echo '<h3>Imprimindo declaração de conteúdo</h3>';
+                    break;
+
+                case 'order_slip':
+                default:
+                    echo '<h3>Imprimindo etiquetas de postagem dos correios</h3>';
+                    break;
+            }
+            ?>
+            
+            <div class="fieldsets">
+                <?php $this->print_action_bar(); ?>
+                
+                <?php if( empty($this->print_action) || $this->print_action == 'order_slip' ){ ?>
+                <fieldset>
+                    <legend>Offset:</legend>
+                    <p>Pular <input type="number" name="offset" value="<?php echo $this->offset; ?>" size="2" min="0" max="<?php echo (int)$this->per_page - 1; ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
+                </fieldset>
+                <?php } ?>
+            </div>
+        </form>
+        
+        <div class="preview-label no-print">
+            <p><a href="javascript: window.print();" class="button-primary btn-print">IMPRIMIR</a></p>
+            <h3>Visualização:</h3>
+            <p>As linhas pontilhadas vermelhas não serão impressas.</p>
+        </div>
+        
+        <?php
+        switch( $this->print_action ){
+                
+            case 'invoice':
+                $this->print_invoices();
+                break;
+            
+            case 'order_slip':
+            default:
+                $this->print_pages();
+                break;
+        }
+        ?>
+        
+        
+        <?php
+        if( $this->debug == true ){
+            echo '<div class="no-print"><pre>';
+            print_r( $this->config );
+            echo '<hr>';
+            print_r( $this );
+            echo '</pre></div>';
+        }
     }
     
     /**
@@ -502,7 +529,7 @@ class SWP_Print_Orders {
     protected function set_orders(){
         
         if( isset($_GET['oid']) ){
-            $this->order_ids = explode(',', $_GET['oid']);
+            $this->order_ids = array_filter(explode(',', $_GET['oid'])); // array filter para remover vazios
         }
         
         foreach( $this->order_ids as $id ){
@@ -1047,6 +1074,12 @@ class SWP_Print_Orders {
             font-family: arial, sans-serif;
             font-size: 10.5pt;
         }
+
+        .help-img {
+            background-color: #fff;
+            border: 1px solid;
+            padding: 10px;
+        }
         
         .paper {
             background-color: #fff;
@@ -1138,12 +1171,18 @@ class SWP_Print_Orders {
             background-color: #d9d9d9;
             border: 1px solid #000;
             font-weight: bold;
-            padding: 2mm;
+            font-size: 8.5pt;
+            padding: 1.5mm;
             text-align: center;
         }
         
         .invoice table th.label {
             background-color: transparent;
+        }
+
+        .invoice table th.invoice-title {
+            font-size: 10pt;
+            padding: 1.5mm;
         }
         
         .invoice table td {
@@ -1174,7 +1213,8 @@ class SWP_Print_Orders {
         
         .invoice table.invoice-disclaimer td,
         .invoice table.invoice-obs td {
-            font-size: 9.5pt;
+            font-size: 8.5pt;
+            line-height: 9pt;
             padding: 2mm;
         }
         
@@ -1379,18 +1419,23 @@ class SWP_Print_Orders {
             font-size: 6pt;
             text-align: center;
             width: 26mm;
+            height: 17mm;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
         }
         .remetente .shop-logo img {
-            width: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
         .remetente .shop-logo .shop-logo-text {
-            width: 100%;
-            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow-wrap: anywhere;
             border: 1px solid #000;
+            padding: 0.5rem;
         }
         .remetente .zip {
             font-size: 120%;
@@ -1629,7 +1674,8 @@ abstract class SWP_Print_Order_Label {
 
     protected function set_shop_logo(){
         if( !empty($this->shop_logo) ){
-            $this->shop_logo = "<img class='shop-logo-img' src='{$this->shop_logo}' alt='' />";
+            $plugin_url = plugin_dir_url( __FILE__ );
+            $this->shop_logo = "<img class='shop-logo-img' src='{$plugin_url}{$this->shop_logo}' alt='' />";
         }
         else{
             $this->shop_logo = sprintf('<div class="shop-logo-text">%s</div>', get_bloginfo('name'));
