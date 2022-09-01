@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name:       SitesWP Etiquetas de Pedidos e Declaração de Conteúdo Correios Brasil
+ * Plugin Name:       SitesWP WooCommerce Print Orders Brazil
  * Plugin URI:        https://github.com/siteswp-team/siteswp-woocommerce-print-orders-brazil
- * Description:       Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do BRasil, para pedidos gerados no WooCommerce.
+ * Description:       Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
  * Author:            SitesWP
  * Author URI:        https://siteswp.com.br/
  * Version:           1.0.0
