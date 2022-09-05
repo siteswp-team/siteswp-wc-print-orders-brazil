@@ -457,7 +457,7 @@ class SWP_Print_Orders {
         <div class="preview-label no-print">
             <p><a href="javascript: window.print();" class="button-primary btn-print">IMPRIMIR</a></p>
             <h3>Visualização:</h3>
-            <p>As linhas pontilhadas vermelhas não serão impressas.</p>
+            <p>As linhas pontilhadas não serão impressas.</p>
         </div>
         
         <?php
@@ -697,8 +697,6 @@ class SWP_Print_Orders {
             'woocommerce_store_address_2' => '',
             'woocommerce_store_postcode'  => '',
             'woocommerce_store_city'      => '',
-            'woocommerce_store_state'     => '',
-            'woocommerce_store_country'   => '',
             'woocommerce_store_cpf_cnpj'  => '',
         );
         foreach( $store_info as $k => $v ){
@@ -709,9 +707,13 @@ class SWP_Print_Orders {
             $store_info['woocommerce_store_address_2'] = ", {$store_info['woocommerce_store_address_2']}";
         }
         
+        // estado e país
         $_country = wc_get_base_location();
         $store_info['woocommerce_store_state'] = $_country['state'];
         $store_info['woocommerce_store_country'] = $_country['country'];
+        
+        // logo da loja
+        $store_info['woocommerce_store_logo'] = $this->config['images']['logo'];
         
         $this->store_info = $store_info;
     }
@@ -791,7 +793,7 @@ class SWP_Print_Orders {
                     <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}"; ?></span></td>
                 </tr>
                 <tr>
-                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_city']} / {$this->store_info['state']}"; ?></span></td>
+                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}"; ?></span></td>
                     <td class="zip-code"><strong class="label">CEP:</strong> <span class="value"><?php echo $this->store_info['woocommerce_store_postcode']; ?></span></td>
                 </tr>
             </table>
@@ -1633,6 +1635,7 @@ abstract class SWP_Print_Order_Label {
     
     protected $shop_data         = array();
 
+    protected $store_info        = '';
     protected $shop_logo         = '';
     protected $logo_sedex        = '';
     protected $logo_pac          = '';
@@ -1671,9 +1674,8 @@ abstract class SWP_Print_Order_Label {
     }
 
     protected function set_shop_logo(){
-        if( !empty($this->shop_logo) ){
-            $plugin_url = plugin_dir_url( __FILE__ );
-            $this->shop_logo = "<img class='shop-logo-img' src='{$plugin_url}{$this->shop_logo}' alt='' />";
+        if( !empty($this->store_info['woocommerce_store_logo']) ){
+            $this->shop_logo = "<img class='shop-logo-img' src='{$this->store_info['woocommerce_store_logo']}' alt='' />";
         }
         else{
             $this->shop_logo = sprintf('<div class="shop-logo-text">%s</div>', get_bloginfo('name'));
@@ -1797,8 +1799,7 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
                 <div class='address'>
                     <strong>Remetente:<br /></strong>
                     <span class='name'>{$this->store_info['blogname']}<br /></span> 
-                    <span class='street'>{$this->store_info['woocommerce_store_address']}</span> 
-                    <span class='neighbor'>{$this->store_info['woocommerce_store_address_2']}<br /></span>
+                    <span class='full-address'>{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}<br /></span>
                     <span class='zip'>{$this->store_info['woocommerce_store_postcode']}</span> 
                     <span class='city-state'>{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}</span>
                 </div>
