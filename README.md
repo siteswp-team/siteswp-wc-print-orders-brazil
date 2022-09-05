@@ -19,7 +19,6 @@ Ajuda: preciso de ajuda para adicionar os outros modelos de etiquetas da pimaco.
 - [ ] adaptar interface para celulares
 - [ ] múltiplas páginas, em caso de muitos produtos na declaração
 - [ ] opção de "entrega no vizinho"
-- [ ] atualizar biblioteca php-barcode-generator
 
 ## Hooks
 

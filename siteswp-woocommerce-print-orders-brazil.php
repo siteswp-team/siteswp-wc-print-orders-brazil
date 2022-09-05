@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+include_once "vendor/autoload.php";
+
 /**
  * Hooks
  * 
@@ -249,8 +251,8 @@ class SWP_Print_Orders {
             'file'    => '',
         ),
         'barcode_config' => array(
-            'width_factor' => 1.8,
-            'height'       => 45,
+            'width_factor' => 2,
+            'height'       => 54,
         ),
     );
     
@@ -603,16 +605,14 @@ class SWP_Print_Orders {
     }
     
     protected function print_order( $order ){
-        include_once( 'vendor/php-barcode-generator/src/BarcodeGenerator.php');
-        include_once( 'vendor/php-barcode-generator/src/BarcodeGeneratorPNG.php');
         
         $address = $order->address_print;
         
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        $generator = new \Picqer\Barcode\BarcodeGeneratorJPG();
         $barcode = base64_encode($generator->getBarcode($address['cep'], $generator::TYPE_CODE_128, $this->barcode_config['width_factor'], $this->barcode_config['height']));
         
         // Etiqueta individual
-        $label  = new SWP_Print_Order_Label_2x2( $order, $address, $barcode );
+        $label  = new SWP_Print_Order_Label_2x2( $order, $address, $barcode, $this->store_info );
         $output = $label->get_label();
         echo apply_filters( 'swp_print_orders_customer_label', $output, $order, $address, $barcode);
     }
@@ -697,14 +697,21 @@ class SWP_Print_Orders {
             'woocommerce_store_address_2' => '',
             'woocommerce_store_postcode'  => '',
             'woocommerce_store_city'      => '',
+            'woocommerce_store_state'     => '',
+            'woocommerce_store_country'   => '',
             'woocommerce_store_cpf_cnpj'  => '',
         );
         foreach( $store_info as $k => $v ){
             $store_info[ $k ] = get_option( $k );
         }
+
+        if( !empty($store_info['woocommerce_store_address_2']) ){
+            $store_info['woocommerce_store_address_2'] = ", {$store_info['woocommerce_store_address_2']}";
+        }
         
         $_country = wc_get_base_location();
-        $store_info['state'] = $_country['state'];
+        $store_info['woocommerce_store_state'] = $_country['state'];
+        $store_info['woocommerce_store_country'] = $_country['country'];
         
         $this->store_info = $store_info;
     }
@@ -781,7 +788,7 @@ class SWP_Print_Orders {
                     <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value"><?php echo $this->store_info['woocommerce_store_cpf_cnpj']; ?></span></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_address']}, {$this->store_info['woocommerce_store_address_2']}"; ?></span></td>
+                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}"; ?></span></td>
                 </tr>
                 <tr>
                     <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_city']} / {$this->store_info['state']}"; ?></span></td>
@@ -1354,21 +1361,26 @@ class SWP_Print_Orders {
         .images {
             position: relative;
             display: flex;
+            gap: 2mm;
             justify-content: space-between;
         }
         .destinatario .shipping-method {
             border: 2px solid #000;
-            border-radius: 6px;
+            border-radius: 2mm;
             width: 30mm;
-            height: 11mm;
+            min-height: 16mm;
             padding: 2mm;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: space-around;
+            box-sizing: border-box;
+        }
+        .destinatario .shipping-method.shipping-empty {
+            border-color: transparent;
         }
         .destinatario .shipping-method img {
             max-height: 18px;
-            width: auto;
+            max-width: 100%;
             align-self: center;
         }
         .destinatario .shipping-local-pickup {
@@ -1384,7 +1396,7 @@ class SWP_Print_Orders {
         }
         .destinatario .address {
             font-size: 8.5pt;
-            height: 24mm;
+            height: 22mm;
             padding: 0 0 2mm;
             line-height: 11pt;
         }
@@ -1398,12 +1410,18 @@ class SWP_Print_Orders {
             float: left;
             overflow: hidden;
             text-align: center;
+            flex: 1;
+        }
+        .destinatario .barcode img {
+            max-width: 100%;
+            max-width: calc(100% - 2mm);
         }
         .remetente {
             font-size: 7pt;
             padding-top: 1mm;
             position: relative;
             display: flex;
+            gap: 2mm;
             line-height: 9.5pt;
         }
         .remetente .address {
@@ -1412,11 +1430,12 @@ class SWP_Print_Orders {
         .remetente .shop-logo {
             font-size: 6pt;
             text-align: center;
-            width: 26mm;
+            width: 30mm;
             height: 17mm;
             display: flex;
             justify-content: center;
             align-items: stretch;
+            box-sizing: border-box;
         }
         .remetente .shop-logo img {
             max-width: 100%;
@@ -1430,6 +1449,7 @@ class SWP_Print_Orders {
             overflow-wrap: anywhere;
             border: 1px solid #000;
             padding: 0.5rem;
+            width: 100%;
         }
         .remetente .zip {
             font-size: 120%;
@@ -1627,7 +1647,7 @@ abstract class SWP_Print_Order_Label {
 
     protected $assets;
     
-    public function __construct( $order, $address, $barcode ){
+    public function __construct( $order, $address, $barcode, $store_info ){
         $this->url = plugins_url( '/', __FILE__ );
 
         $this->label_destinatario = $this->url . 'assets/img/label-destinatario.png';
@@ -1639,7 +1659,8 @@ abstract class SWP_Print_Order_Label {
         $this->address = $address;
         $this->barcode = $barcode;
         
-        $this->set_shop_data();
+        $this->store_info = $store_info;
+
         $this->set_shop_logo();
         $this->set_method_image();
         $this->set_label();
@@ -1647,25 +1668,6 @@ abstract class SWP_Print_Order_Label {
     
     public function get_label(){
         return $this->label;
-    }
-
-    public function set_shop_data(){
-        $shop_keys = array(
-            'blogname',
-            'woocommerce_store_address',
-            'woocommerce_store_address_2',
-            'woocommerce_store_city',
-            'woocommerce_default_country',
-            'woocommerce_store_postcode',
-            'woocommerce_store_cpf_cnpj',
-        );
-        foreach( $shop_keys as $key ){
-            $opt = get_option($key);
-            if( $key == 'woocommerce_default_country' ){
-                $opt = explode(':', $opt)[1];
-            }
-            $this->shop_data[$key] = $opt;
-        }
     }
 
     protected function set_shop_logo(){
@@ -1702,6 +1704,9 @@ abstract class SWP_Print_Order_Label {
         }
         elseif( $this->has_shipping_method('local_pickup') ){
             $this->method_img = "<div class='shipping-method shipping-local-pickup'><div>retirada</div></div>";
+        }
+        else{
+            $this->method_img = "<div class='shipping-method shipping-empty'>&nbsp;</div>";
         }
     }
     
@@ -1777,7 +1782,8 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
                     <span class='name'>{$this->address['nome']}</span> <span class='company'>{$this->address['empresa']}</span><br />
                     <span class='street'>{$this->address['logradouro']}{$this->address['complemento']}</span><br />
                     <span class='neighbor'>{$this->address['bairro']}</span>
-                    <br /><span class='city'>{$this->address['cidade']}</span> / <span class='state'>{$this->address['uf']}</span>
+                    <br />
+                    <strong class='cep'>{$this->address['cep']}</strong> <span class='city'>{$this->address['cidade']}</span> / <span class='state'>{$this->address['uf']}</span>
                 </div>
                 <div class='images'>
                     <div class='barcode'>
@@ -1790,11 +1796,11 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
             <div class='remetente'>
                 <div class='address'>
                     <strong>Remetente:<br /></strong>
-                    <span class='name'>{$this->shop_data['blogname']}<br /></span> 
-                    <span class='street'>{$this->shop_data['woocommerce_store_address']}<br /></span> 
-                    <span class='neighbor'>{$this->shop_data['woocommerce_store_address_2']}<br /></span>
-                    <span class='zip'>{$this->shop_data['woocommerce_store_postcode']}</span> 
-                    <span class='city-state'>{$this->shop_data['woocommerce_store_city']} {$this->shop_data['woocommerce_default_country']}<br /></span>
+                    <span class='name'>{$this->store_info['blogname']}<br /></span> 
+                    <span class='street'>{$this->store_info['woocommerce_store_address']}</span> 
+                    <span class='neighbor'>{$this->store_info['woocommerce_store_address_2']}<br /></span>
+                    <span class='zip'>{$this->store_info['woocommerce_store_postcode']}</span> 
+                    <span class='city-state'>{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}</span>
                 </div>
                 <div class='shop-logo'>
                     {$this->shop_logo}
