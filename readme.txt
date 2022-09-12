@@ -1,5 +1,5 @@
 === SitesWP WooCommerce Print Orders Brazil ===
-Contributors: siteswp
+Contributors: siteswp, alexkoti
 Donate link: https://siteswp.com.br/contato/
 Tags: woocommerce, shipping, correios, brasil
 Requires at least: 5.2
