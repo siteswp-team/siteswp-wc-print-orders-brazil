@@ -55,5 +55,5 @@ Não, este plugin utiliza do recurso nativo de impressão do navegador, onde voc
 
 == Changelog ==
 
-= 1.0.0 - 2022.09.01 =
+= 1.0.0 - 2022.09.12 =
 * Lançamento inicial
