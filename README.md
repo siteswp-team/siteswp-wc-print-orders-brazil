@@ -1,6 +1,6 @@
 
 
-# SitesWP WooCommerce Print Orders Brazil
+# SitesWP WC Print Orders Brazil
 
 Plugin para impressão de etiquetas de envio e declaração dos correios a partir de pedidos do WooCommerce.
 
