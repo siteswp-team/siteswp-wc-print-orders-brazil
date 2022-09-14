@@ -304,11 +304,12 @@ class SWP_Print_Orders {
 
     public function enqueues( $hook ){
         if( $hook == 'woocommerce_page_correios_print_orders' ){
-            echo $this->css_base();
-            echo $this->css_preview();
-            echo $this->css_print();
+            $this->css_base();
+            $this->css_preview();
+            $this->css_print();
+            $this->config['css']['file'] = plugin_dir_url( __FILE__ ) . '/assets/test.css';
             if( !empty($this->config['css']['file']) ){
-                echo "<link rel='stylesheet' href='{$this->config['css']['file']}' />";
+                wp_enqueue_style('swp-print-order-custom', esc_url($this->config['css']['file']));
             }
         }
     }
@@ -391,7 +392,7 @@ class SWP_Print_Orders {
     public function render_page(){
         ?>
         <div class="wrap" id="swp-print-orders">
-            <h2 class="no-print"><?php echo $this->admin_title; ?></h2>
+            <h2 class="no-print"><?php echo esc_html($this->admin_title); ?></h2>
 
             <?php
             if( empty($this->order_ids) ){
@@ -413,11 +414,11 @@ class SWP_Print_Orders {
             <p>Acesse a lista de pedidos e selecione quais vocês deseja imprimir.</p>
             <p>
                 Você pode selecionar múltiplos pedidos: <br>
-                <img src="<?php echo $this->plugin_url; ?>/assets/img/ajuda-1.gif" alt="" class="help-img" />
+                <img src="<?php echo esc_url($this->plugin_url); ?>/assets/img/ajuda-1.gif" alt="" class="help-img" />
             </p>
             <p>
                 Ou pode imprimir pedidos individualmente: <br>
-                <img src="<?php echo $this->plugin_url; ?>/assets/img/ajuda-2.gif" alt="" class="help-img" />
+                <img src="<?php echo esc_url($this->plugin_url); ?>/assets/img/ajuda-2.gif" alt="" class="help-img" />
             </p>
         </div>
         <?php
@@ -427,17 +428,17 @@ class SWP_Print_Orders {
         ?>
         <form action="" method="get" class="print-config-form no-print">
             <input type="hidden" name="page" value="correios_print_orders" />
-            <input type="hidden" name="oid" value="<?php echo implode(',', $this->order_ids); ?>" />
+            <input type="hidden" name="oid" value="<?php echo esc_attr(implode(',', $this->order_ids)); ?>" />
             
             <?php
             switch( $this->print_action ){
                 case 'invoice':
-                    echo '<h3>Imprimindo declaração de conteúdo</h3>';
+                    printf('<h3>%s</h3>', esc_html('Imprimindo declaração de conteúdo'));
                     break;
 
                 case 'order_slip':
                 default:
-                    echo '<h3>Imprimindo etiquetas de postagem dos correios</h3>';
+                    printf('<h3>%s</h3>', esc_html('Imprimindo etiquetas de postagem dos correios'));
                     break;
             }
             ?>
@@ -448,7 +449,7 @@ class SWP_Print_Orders {
                 <?php if( empty($this->print_action) || $this->print_action == 'order_slip' ){ ?>
                 <fieldset>
                     <legend>Offset:</legend>
-                    <p>Pular <input type="number" name="offset" value="<?php echo $this->offset; ?>" size="2" min="0" max="<?php echo (int)$this->per_page - 1; ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
+                    <p>Pular <input type="number" name="offset" value="<?php echo esc_attr($this->offset); ?>" size="2" min="0" max="<?php echo esc_attr((int)$this->per_page - 1); ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
                 </fieldset>
                 <?php } ?>
             </div>
@@ -554,14 +555,13 @@ class SWP_Print_Orders {
     }
     
     protected function print_pages(){
-        echo "<div class='paper paper-{$this->paper['name']}'>";
+        printf('<div class="paper paper-%s">', esc_attr($this->paper['name']));
             $total = 0;
             $cel = 1;
             if( $this->offset > 0 ){
                 for( $i = 1; $i <= $this->offset; $i++ ){
                     echo '<div class="order empty"><span>vazio</span></div>';
                     if( $cel == 2 ){
-                        //echo '<hr />';
                         $cel = 1;
                     }
                     else{
@@ -572,7 +572,7 @@ class SWP_Print_Orders {
             }
             
             foreach( $this->orders as $order ){
-                echo "<div class='order layout-{$this->layout['name']}'>";
+                printf('<div class="order layout-">', esc_attr($this->layout['name']));
                 $this->print_order( $order );
                 echo '</div>';
                 if( $cel == 2 ){
@@ -584,14 +584,14 @@ class SWP_Print_Orders {
                 $total++;
                 
                 if( $total % $this->per_page == 0 && $total != (count($this->order_ids) + $this->offset) ){
-                    echo "</div><div class='paper paper-{$this->paper['name']}'>";
+                    printf('</div><div class="paper paper-%s">', esc_attr($this->paper['name']));
                 }
             }
             
             $empty = ($this->per_page - ($this->offset + count($this->order_ids)));
             if( $empty > 0 ){
                 for( $n = 1; $n <= $empty; $n++ ){
-                    echo "<div class='order empty paper-{$this->paper['name']} layout-{$this->layout['name']}''><span>vazio</span></div>";
+                    printf('<div class="order empty paper-%s layout-%s"><span>vazio</span></div>', esc_attr($this->paper['name']), esc_attr($this->layout['name']));
                     if( $cel == 2 ){
                         $cel = 1;
                     }
@@ -727,7 +727,7 @@ class SWP_Print_Orders {
         $i = 0;
         foreach( $this->orders as $id => $order ){
             $invoice = $this->set_invoice( $order );
-            echo apply_filters( 'swp_print_orders_single_invoice_output', "<div class='paper invoice'><div class='invoice-inner'>{$invoice}</div></div>", $invoice, $id, $i);
+            echo apply_filters( 'swp_print_orders_single_invoice_output', sprintf('<div class="paper invoice"><div class="invoice-inner">%s</div></div>', $invoice), $invoice, $id, $i);
             $i++;
         }
         echo apply_filters( 'swp_print_orders_single_invoice_output_end', '' );
@@ -780,35 +780,35 @@ class SWP_Print_Orders {
         ?>
         <div class="invoice-page">
             <h1 class="invoice-logo">
-                <img src="<?php echo $this->plugin_url; ?>/assets/img/logo-correios.svg" alt="" class="correios-logo" />
+                <img src="<?php echo esc_url($this->plugin_url); ?>/assets/img/logo-correios.svg" alt="" class="correios-logo" />
                 Declaração de Conteúdo
             </h1>
             <!-- remetente -->
             <table class="invoice-sender" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td class="sender"><strong class="label">REMETENTE:</strong> <span class="value"><?php echo $this->store_info['blogname']; ?></span></td>
-                    <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value"><?php echo $this->store_info['woocommerce_store_cpf_cnpj']; ?></span></td>
+                    <td class="sender"><strong class="label">REMETENTE:</strong> <span class="value"><?php echo esc_html($this->store_info['blogname']); ?></span></td>
+                    <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value"><?php echo esc_html($this->store_info['woocommerce_store_cpf_cnpj']); ?></span></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}"; ?></span></td>
+                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo esc_html("{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}"); ?></span></td>
                 </tr>
                 <tr>
-                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo "{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}"; ?></span></td>
-                    <td class="zip-code"><strong class="label">CEP:</strong> <span class="value"><?php echo $this->store_info['woocommerce_store_postcode']; ?></span></td>
+                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo esc_html("{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}"); ?></span></td>
+                    <td class="zip-code"><strong class="label">CEP:</strong> <span class="value"><?php echo esc_html($this->store_info['woocommerce_store_postcode']); ?></span></td>
                 </tr>
             </table>
             <!-- destinatário -->
             <table class="invoice-client" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td class="receiver"><strong class="label">DESTINATÁRIO:</strong> <span class="value"><?php echo $order->address_print['nome']; ?></span></td>
-                    <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value"><?php echo $order->get_meta('_billing_cpf'); ?></span></td>
+                    <td class="receiver"><strong class="label">DESTINATÁRIO:</strong> <span class="value"><?php echo esc_html($order->address_print['nome']); ?></span></td>
+                    <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value"><?php echo esc_html($order->get_meta('_billing_cpf')); ?></span></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo "{$order->address_print['logradouro']}{$order->address_print['complemento']}, {$order->address_print['bairro']}"; ?></span></td>
+                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo esc_html("{$order->address_print['logradouro']}{$order->address_print['complemento']}, {$order->address_print['bairro']}"); ?></span></td>
                 </tr>
                 <tr>
-                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo "{$order->address_print['cidade']} / {$order->address_print['uf']}"; ?></span></td>
-                    <td class="zip-code"><strong class="label">CEP:</strong> <span class="value"><?php echo $order->address_print['cep']; ?></span></td>
+                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo esc_html("{$order->address_print['cidade']} / {$order->address_print['uf']}"); ?></span></td>
+                    <td class="zip-code"><strong class="label">CEP:</strong> <span class="value"><?php echo esc_html($order->address_print['cep']); ?></span></td>
                 </tr>
             </table>
             <!-- lista de itens -->
@@ -826,9 +826,9 @@ class SWP_Print_Orders {
                 <?php if( $this->invoice_group_items == true ){ ?>
                     <tr>
                         <td class="item-value group-item"></td>
-                        <td class="item-value group-title"><?php echo $group_title; ?></td>
-                        <td class="item-value group-quantity"><?php echo $quantity_total; ?></td>
-                        <td class="item-value group-weight"><?php echo wc_format_weight($weight_total); ?></td>
+                        <td class="item-value group-title"><?php echo esc_html($group_title); ?></td>
+                        <td class="item-value group-quantity"><?php echo esc_html($quantity_total); ?></td>
+                        <td class="item-value group-weight"><?php echo wp_kses_post(wc_format_weight($weight_total)); ?></td>
                     </tr>
                     <?php for($u = 0; $u < $this->invoice_group_empty_rows; $u++){ ?>
                     <tr>
@@ -842,21 +842,21 @@ class SWP_Print_Orders {
                 <?php foreach( $order_items as $i => $item ){ ?>
                     <tr class="order-items">
                         <td class="item-value group-item"><?php echo $i + 1; ?></td>
-                        <td class="item-value item-name"><?php echo $item['name']; ?></td>
-                        <td class="item-value item-quantity"><?php echo $item['quantity']; ?></td>
-                        <td class="item-value item-price"><?php echo wc_price($item['price']); ?></td>
+                        <td class="item-value item-name"><?php echo esc_html($item['name']); ?></td>
+                        <td class="item-value item-quantity"><?php echo esc_html($item['quantity']); ?></td>
+                        <td class="item-value item-price"><?php echo wp_kses_post(wc_price($item['price'])); ?></td>
                     </tr>
                 <?php } ?>
                 <?php } ?>
 
                 <tr class="total">
                     <td colspan="2" class="label-right">TOTAIS</td>
-                    <td><?php echo $quantity_total; ?></td>
-                    <td class="order-total"><?php echo wc_price($subtotal); ?></td>
+                    <td><?php echo esc_html($quantity_total); ?></td>
+                    <td class="order-total"><?php echo wp_kses_post(wc_price($subtotal)); ?></td>
                 </tr>
                 <tr class="total">
                     <td colspan="2" class="label-right">PESO TOTAL</td>
-                    <td colspan="2"><?php echo wc_format_weight($weight_total); ?></td>
+                    <td colspan="2"><?php echo wp_kses_post(wc_format_weight($weight_total)); ?></td>
                 </tr>
             </table>
             <!-- declaração -->
@@ -875,10 +875,10 @@ class SWP_Print_Orders {
                         
                         <div class="signature-date">
                             <div class="date">
-                                <span class="underline"><?php echo $this->store_info['woocommerce_store_city']; ?></span>, 
-                                <span class="underline"><?php echo $invoice_info['signature']['day']; ?></span> de 
-                                <span class="underline"><?php echo $invoice_info['signature']['month']; ?></span> de 
-                                <span class="underline"><?php echo $invoice_info['signature']['year']; ?></span>
+                                <span class="underline"><?php echo esc_html($this->store_info['woocommerce_store_city']); ?></span>, 
+                                <span class="underline"><?php echo esc_html($invoice_info['signature']['day']); ?></span> de 
+                                <span class="underline"><?php echo esc_html($invoice_info['signature']['month']); ?></span> de 
+                                <span class="underline"><?php echo esc_html($invoice_info['signature']['year']); ?></span>
                             </div>
                             <div class="signature">
                                 Assinatura do Declarante/Remetente
@@ -1006,19 +1006,19 @@ class SWP_Print_Orders {
                     var url = updateQueryStringParameter( $('#excs-print-orders-button').attr('href'), 'oid', ids_arr.join(',') );
                     $('#excs-print-orders-button').attr('href', url);
                 });
-                $('<a href="<?php echo $url; ?>" class="button" target="_blank" id="excs-print-orders-button">Imprimir Pedidos Selecionados</a>').insertAfter('#post-query-submit');
+                $('<a href="<?php echo esc_url($url); ?>" class="button" target="_blank" id="excs-print-orders-button">Imprimir Pedidos Selecionados</a>').insertAfter('#post-query-submit');
                 
                 // botão individual
                 if( $('.column-order_number .excs-order-items').length ){
                     $('.column-order_number .excs-order-items').each(function( index ){
                         var id = $(this).closest('tr').attr('id').replace('post-', '');
-                        $('<a href="<?php echo $url; ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual">Etiqueta </a>').insertAfter( $(this) );
+                        $('<a href="<?php echo esc_url($url); ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual">Etiqueta </a>').insertAfter( $(this) );
                     });
                 }
                 else{
                     $('.order-preview').each(function( index ){
                         var id = $(this).closest('tr').attr('id').replace('post-', '');
-                        $('<a href="<?php echo $url; ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual"></a>').insertAfter( $(this) );
+                        $('<a href="<?php echo esc_url($url); ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual"></a>').insertAfter( $(this) );
                     });
                 }
             });
@@ -1083,19 +1083,19 @@ class SWP_Print_Orders {
         
         .paper {
             background-color: #fff;
-            width: <?php echo $this->paper['width']; ?>mm;
-            height: <?php echo $this->paper['height']; ?>mm;
+            width: <?php echo esc_attr($this->paper['width']); ?>mm;
+            height: <?php echo esc_attr($this->paper['height']); ?>mm;
             margin: 10px auto;
             box-sizing: border-box;
-            padding: <?php echo $this->layout['page_margins']; ?>;
+            padding: <?php echo esc_attr($this->layout['page_margins']); ?>;
         }
         
         .order {
             float: left;
             position: relative;
-            width: <?php echo $this->layout['width']; ?>;
-            height: <?php echo $this->layout['height']; ?>;
-            margin: <?php echo $this->layout['item_margin']; ?>;
+            width: <?php echo esc_attr($this->layout['width']); ?>;
+            height: <?php echo esc_attr($this->layout['height']); ?>;
+            margin: <?php echo esc_attr($this->layout['item_margin']); ?>;
             position: relative;
         }
         
@@ -1473,9 +1473,9 @@ class SWP_Print_Orders {
         .aviso-impresso div {
             margin: 1.5mm 0;
         }
+        <?php echo strip_tags($this->config['css']['base']); ?>
         </style>
         <?php
-        echo '<style type="text/css">' . $this->config['css']['base'] . '</style>';
     }
     
     /**
@@ -1529,10 +1529,9 @@ class SWP_Print_Orders {
             font-size: 18px;
             padding: 4px 14px 1px
         }
-        
+        <?php echo strip_tags($this->config['css']['preview']); ?>
         </style>
         <?php
-        echo '<style type="text/css">' . $this->config['css']['preview'] . '</style>';
     }
     
     /**
@@ -1545,15 +1544,15 @@ class SWP_Print_Orders {
         <style type="text/css" id="css-print">
         /* CSS print only */
         @page {
-            size: <?php echo $this->paper['name']; ?>;
+            size: <?php echo esc_attr($this->paper['name']); ?>;
             margin: 0;
         }
         @media print {
             /* É vital que as medidas do body sejam iguais ao tamanho do papel, para não ocorrer redimensionamento no navegador */
             html, body {
-                height: <?php echo $this->paper['height']; ?>mm;
+                height: <?php echo esc_attr($this->paper['height']); ?>mm;
                 margin: 0;
-                width: <?php echo $this->paper['width']; ?>mm;
+                width: <?php echo esc_attr($this->paper['width']); ?>mm;
             }
             
             .paper {
@@ -1614,10 +1613,8 @@ class SWP_Print_Orders {
             #wpadminbar {
                 display: none;
             }
+            <?php echo strip_tags($this->config['css']['print']); ?>
         }
-        
-        <?php echo $this->config['css']['print']; ?>
-        
         </style>
         <?php
     }
@@ -1699,16 +1696,16 @@ abstract class SWP_Print_Order_Label {
     protected function set_method_image(){
         
         if( $this->has_shipping_method('correios-sedex') ){
-            $this->method_img = "<div class='shipping-method shipping-sedex'><img src='{$this->logo_sedex}' alt='' /><img src='{$this->logo_correios}' alt='' /></div>";
+            $this->method_img = sprintf('<div class="shipping-method shipping-sedex"><img src="%s" alt="" /><img src="%s" alt="" /></div>', esc_url($this->logo_sedex), esc_url($this->logo_correios));
         }
         elseif( $this->has_shipping_method('correios-pac') || $this->has_shipping_method('free') ){
-            $this->method_img = "<div class='shipping-method shipping-pac'><img src='{$this->logo_pac}' alt='' /><img src='{$this->logo_correios}' alt='' /></div>";
+            $this->method_img = sprintf('<div class="shipping-method shipping-pac"><img src="" alt="" /><img src="" alt="" /></div>', esc_url($this->logo_pac), esc_url($this->logo_correios));
         }
         elseif( $this->has_shipping_method('local_pickup') ){
-            $this->method_img = "<div class='shipping-method shipping-local-pickup'><div>retirada</div></div>";
+            $this->method_img = '<div class="shipping-method shipping-local-pickup"><div>retirada</div></div>';
         }
         else{
-            $this->method_img = "<div class='shipping-method shipping-empty'>&nbsp;</div>";
+            $this->method_img = '<div class="shipping-method shipping-empty">&nbsp;</div>';
         }
     }
     
@@ -1749,10 +1746,14 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
         
         $customer_note = $this->order->get_customer_note();
         if( !empty($customer_note) ){
-            $customer_note = "<div class='customer-note'>{$customer_note}</div>";
+            $customer_note = sprintf('<div class="customer-note">%s</div>', esc_html($customer_note));
         }
         
-        $order_list = "<div class='order-number'>PEDIDO #{$this->order->get_id()}</div><div class='order-items'><div>{$cart}</div></div>";
+        $order_list = sprintf(
+            '<div class="order-number">PEDIDO #%s</div><div class="order-items"><div>%s</div></div>',
+            esc_html($this->order->get_id()),
+            wp_kses_post($cart)
+        );
         
         $this->label = "
         <div class='order-inner'>
