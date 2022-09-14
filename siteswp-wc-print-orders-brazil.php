@@ -535,7 +535,10 @@ class SWP_Print_Orders {
     protected function set_orders(){
         
         if( isset($_GET['oid']) ){
-            $this->order_ids = array_filter(explode(',', $_GET['oid'])); // array filter para remover vazios
+            // array filter para remover vazios e não integers
+            $this->order_ids = array_filter(explode(',', $_GET['oid']), function( $var ){
+                return (int)$var;
+            });
         }
         
         foreach( $this->order_ids as $id ){
