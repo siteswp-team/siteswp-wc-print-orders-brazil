@@ -307,7 +307,6 @@ class SWP_Print_Orders {
             $this->css_base();
             $this->css_preview();
             $this->css_print();
-            $this->config['css']['file'] = plugin_dir_url( __FILE__ ) . '/assets/test.css';
             if( !empty($this->config['css']['file']) ){
                 wp_enqueue_style('swp-print-order-custom', esc_url($this->config['css']['file']));
             }
@@ -1752,10 +1751,12 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
         $order_list = sprintf(
             '<div class="order-number">PEDIDO #%s</div><div class="order-items"><div>%s</div></div>',
             esc_html($this->order->get_id()),
-            wp_kses_post($cart)
+            $cart
         );
         
-        $this->label = "
+        ob_start();
+
+        ?>
         <div class='order-inner'>
             <div class='correios-blank'>
                 <div class='bd' id='bd-tl'></div>
@@ -1763,8 +1764,8 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
                 <div class='bd' id='bd-bl'></div>
                 <div class='bd' id='bd-br'></div>
                 <div class='inner'>
-                    <div class='declarado'>Valor declarado: {$this->cost_display}</div>
-                    {$order_list}
+                    <div class='declarado'>Valor declarado: <?php wp_kses_post($this->cost_display); ?></div>
+                    <?php wp_kses_post($order_list); ?>
                 </div>
             </div>
             <div class='assinatura-box'>
@@ -1781,34 +1782,47 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
             </div>
             <div class='destinatario'>
                 <div class='address'>
-                    <img class='destinatario-label' src='{$this->label_destinatario}' alt='' />
-                    <span class='name'>{$this->address['nome']}</span> <span class='company'>{$this->address['empresa']}</span><br />
-                    <span class='street'>{$this->address['logradouro']}{$this->address['complemento']}</span><br />
-                    <span class='neighbor'>{$this->address['bairro']}</span>
+                    <img class='destinatario-label' src='<?php echo esc_url($this->label_destinatario); ?>' alt='' />
+                    <span class='name'><?php echo esc_html($this->address['nome']); ?></span> <span class='company'><?php echo esc_html($this->address['empresa']); ?></span><br />
+                    <span class='street'><?php echo esc_html("{$this->address['logradouro']}{$this->address['complemento']}"); ?></span><br />
+                    <span class='neighbor'><?php echo esc_html($this->address['bairro']); ?></span>
                     <br />
-                    <strong class='cep'>{$this->address['cep']}</strong> <span class='city'>{$this->address['cidade']}</span> / <span class='state'>{$this->address['uf']}</span>
+                    <strong class='cep'><?php echo esc_html($this->address['cep']); ?></strong> <span class='city'><?php echo esc_html($this->address['cidade']); ?></span> / <span class='state'><?php echo esc_html($this->address['uf']); ?></span>
                 </div>
                 <div class='images'>
                     <div class='barcode'>
-                        {$this->address['cep']} {$this->address['uf']}<br />
-                        <img src='data:image/png;base64,{$this->barcode}' />
+                        <?php echo esc_html("{$this->address['cep']} {$this->address['uf']}"); ?><br />
+                        <?php
+                        // Permitir apenas imagens para o código de barras
+                        // O terceiro parâmetro data em wp_kses permite o uso de imagem base64
+                        $allowed = [
+                            'img' => [
+                                'src' => []
+                            ]
+                        ];
+                        echo wp_kses("<img src='data:image/png;base64,{$this->barcode}' />", $allowed, ['data']);
+                        ?>
                     </div>
-                    {$this->method_img}
+                    <?php echo wp_kses_post($this->method_img); ?>
                 </div>
             </div>
             <div class='remetente'>
                 <div class='address'>
                     <strong>Remetente:<br /></strong>
-                    <span class='name'>{$this->store_info['blogname']}<br /></span> 
-                    <span class='full-address'>{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}<br /></span>
-                    <span class='zip'>{$this->store_info['woocommerce_store_postcode']}</span> 
-                    <span class='city-state'>{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}</span>
+                    <span class='name'><?php echo esc_html($this->store_info['blogname']); ?><br /></span> 
+                    <span class='full-address'><?php echo esc_html("{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}"); ?><br /></span>
+                    <span class='zip'><?php echo esc_html($this->store_info['woocommerce_store_postcode']); ?></span> 
+                    <span class='city-state'><?php echo esc_html("{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}"); ?></span>
                 </div>
                 <div class='shop-logo'>
-                    {$this->shop_logo}
+                    <?php echo wp_kses_post($this->shop_logo); ?>
                 </div>
             </div>
-        </div>";
+        </div>
+        <?php
+
+        $this->label = ob_get_contents();
+        ob_end_clean();
     }
 }
 
