@@ -245,10 +245,7 @@ class SWP_Print_Orders {
             'invoice_group_empty_rows' => 5,          // quantidade de linhas em branco após a listagem resumida
         ),
         'css' => array(
-            'base'    => '',
-            'preview' => '',
-            'print'   => '',
-            'file'    => '',
+            'file' => '',
         ),
         'barcode_config' => array(
             'width_factor' => 2,
@@ -1474,7 +1471,6 @@ class SWP_Print_Orders {
         .aviso-impresso div {
             margin: 1.5mm 0;
         }
-        <?php echo strip_tags($this->config['css']['base']); ?>
         </style>
         <?php
     }
@@ -1530,7 +1526,6 @@ class SWP_Print_Orders {
             font-size: 18px;
             padding: 4px 14px 1px
         }
-        <?php echo strip_tags($this->config['css']['preview']); ?>
         </style>
         <?php
     }
@@ -1614,7 +1609,6 @@ class SWP_Print_Orders {
             #wpadminbar {
                 display: none;
             }
-            <?php echo strip_tags($this->config['css']['print']); ?>
         }
         </style>
         <?php
