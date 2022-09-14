@@ -1,4 +1,4 @@
-=== SitesWP WC Print Orders Brazil ===
+=== SitesWP Print Orders Brazil for WooCommerce ===
 Contributors: siteswp, alexkoti
 Donate link: https://siteswp.com.br/contato/
 Tags: woocommerce, shipping, correios, Brasil
