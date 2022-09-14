@@ -573,7 +573,7 @@ class SWP_Print_Orders {
             }
             
             foreach( $this->orders as $order ){
-                printf('<div class="order layout-">', esc_attr($this->layout['name']));
+                printf('<div class="order layout-%s">', esc_attr($this->layout['name']));
                 $this->print_order( $order );
                 echo '</div>';
                 if( $cel == 2 ){
