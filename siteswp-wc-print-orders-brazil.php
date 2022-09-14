@@ -345,9 +345,9 @@ class SWP_Print_Orders {
         
         // ajustar altura das etiquetas calculando a medida do paper com as margens
         if( $this->config['layout']['group'] == 'percentage' ){
-            $margim = str_replace( 'mm', '', explode( ' ', $this->layout['page_margins'] ) );
+            $margin = str_replace( 'mm', '', explode( ' ', $this->layout['page_margins'] ) );
             $divider = str_replace('%', '', $this->layout['height']);
-            $this->layout['height'] = ( ($divider / 100) * ($this->paper['height'] - $margim[0] - $margim[2]) ) . 'mm';
+            $this->layout['height'] = ( ($divider / 100) * ($this->paper['height'] - $margin[0] - $margin[2]) ) . 'mm';
         }
         
         // quantidade de etiquetas por página
@@ -361,7 +361,6 @@ class SWP_Print_Orders {
         );
         
         // definir offset
-        //$this->offset = isset($_GET['offset']) ? $_GET['offset'] : 0;
         $this->set_form_var('offset', 0);
         if( $this->offset > ($this->per_page - 1) ){
             $this->offset = ($this->per_page - 1);
@@ -448,7 +447,7 @@ class SWP_Print_Orders {
                 <?php if( empty($this->print_action) || $this->print_action == 'order_slip' ){ ?>
                 <fieldset>
                     <legend>Offset:</legend>
-                    <p>Pular <input type="number" name="offset" value="<?php echo esc_attr($this->offset); ?>" size="2" min="0" max="<?php echo esc_attr((int)$this->per_page - 1); ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
+                    <p>Pular <input type="number" name="offset" value="<?php echo esc_attr((int)$this->offset); ?>" size="2" min="0" max="<?php echo esc_attr((int)$this->per_page - 1); ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
                 </fieldset>
                 <?php } ?>
             </div>
