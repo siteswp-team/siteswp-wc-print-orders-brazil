@@ -839,7 +839,7 @@ class SWP_Print_Orders {
                 <?php } else { ?>
                 <?php foreach( $order_items as $i => $item ){ ?>
                     <tr class="order-items">
-                        <td class="item-value group-item"><?php echo $i + 1; ?></td>
+                        <td class="item-value group-item"><?php echo intval($i) + 1; ?></td>
                         <td class="item-value item-name"><?php echo esc_html($item['name']); ?></td>
                         <td class="item-value item-quantity"><?php echo esc_html($item['quantity']); ?></td>
                         <td class="item-value item-price"><?php echo wp_kses_post(wc_price($item['price'])); ?></td>
