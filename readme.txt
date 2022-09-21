@@ -42,9 +42,11 @@ Requer WooCommerce Extra Checkout Fields for Brazil para funcionar. Este plugin 
 == Frequently Asked Questions ==
 
 = Este plugin tem integração com o sistema SIGEP Web dos Correios? =
+
 Não, esta integração está fora do escopo deste plugin, que é voltado para lojas em estágio inicial de operação.
 
 = É gerado arquivos PDF das etiquetas e declaração? =
+
 Não, este plugin utiliza do recurso nativo de impressão do navegador, onde você poderá escolher a impressora ou "salvar como PDF".
 
 == Screenshots ==
