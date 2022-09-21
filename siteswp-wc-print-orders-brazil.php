@@ -624,9 +624,9 @@ class SWP_Print_Orders {
             $number       = $this->get_address_meta_data( $order_meta_data, '_billing_number' );
             $neighborhood = $this->get_address_meta_data( $order_meta_data, '_billing_neighborhood' );
             $address = array(
-                'nome'           => "{$order_data['billing']['first_name']} {$order_data['billing']['last_name']}",
+                'nome'           => trim("{$order_data['billing']['first_name']} {$order_data['billing']['last_name']}"),
                 'empresa'        => empty($order_data['billing']['company']) ? '' : " - {$order_data['billing']['company']}",
-                'logradouro'     => "{$order_data['billing']['address_1']} {$number}",
+                'logradouro'     => trim("{$order_data['billing']['address_1']} {$number}"),
                 'complemento'    => empty($order_data['billing']['address_2']) ? '' : ", {$order_data['billing']['address_2']}",
                 'bairro'         => empty($neighborhood) ? '' : "{$neighborhood}",
                 'cidade'         => $order_data['billing']['city'],
@@ -638,9 +638,9 @@ class SWP_Print_Orders {
             $number       = $this->get_address_meta_data( $order_meta_data, '_shipping_number' );
             $neighborhood = $this->get_address_meta_data( $order_meta_data, '_shipping_neighborhood' );
             $address = array(
-                'nome'           => "{$order_data['shipping']['first_name']} {$order_data['shipping']['last_name']}",
+                'nome'           => trim("{$order_data['shipping']['first_name']} {$order_data['shipping']['last_name']}"),
                 'empresa'        => empty($order_data['shipping']['company']) ? '' : " - {$order_data['shipping']['company']}",
-                'logradouro'     => "{$order_data['shipping']['address_1']} {$number}",
+                'logradouro'     => trim("{$order_data['shipping']['address_1']} {$number}"),
                 'complemento'    => empty($order_data['shipping']['address_2']) ? '' : ", {$order_data['shipping']['address_2']}",
                 'bairro'         => empty($neighborhood) ? '' : "{$neighborhood}",
                 'cidade'         => $order_data['shipping']['city'],
@@ -648,29 +648,7 @@ class SWP_Print_Orders {
                 'cep'            => $order_data['shipping']['postcode'],
             );
         }
-        $address = $this->validate_address( $address );
         $address = apply_filters( 'swp_print_orders_customer_address', $address, $order );
-        return $address;
-    }
-    
-    /**
-     * Validar dados do endereço para certificar de que não existem campos faltantes.
-     * Exibe um texto de alerta destacado para a visualização no navegador. A versão impressa não exibe o alerta.
-     * 
-     */
-    protected function validate_address( $address ){
-        $optional = array(
-            'empresa',
-            'complemento',
-        );
-        foreach( $address as $key => $value ){
-            if( !in_array($key, $optional) ){
-                $cleanned = trim($value);
-                if( empty($cleanned) or ($key == 'logradouro' and strlen($value) < 4) ){
-                    $address[ $key ] = "<span class='empty-data' style='font-size:12pt;color:red;text-transform:uppercase;'>[{$key} VAZIO]</span>{$value}";
-                }
-            }
-        }
         return $address;
     }
     
@@ -798,15 +776,23 @@ class SWP_Print_Orders {
             <!-- destinatário -->
             <table class="invoice-client" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td class="receiver"><strong class="label">DESTINATÁRIO:</strong> <span class="value"><?php echo esc_html($order->address_print['nome']); ?></span></td>
-                    <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value"><?php echo esc_html($order->get_meta('_billing_cpf')); ?></span></td>
+                    <td class="receiver"><strong class="label">DESTINATÁRIO:</strong> <span class="value" title="Nome"><?php echo esc_html($order->address_print['nome']); ?></span></td>
+                    <td class="document"><strong class="label">CPF/CNPJ:</strong> <span class="value" title="CPF"><?php echo esc_html($order->get_meta('_billing_cpf')); ?></span></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="address"><strong class="label">ENDEREÇO:</strong> <span class="value"><?php echo esc_html("{$order->address_print['logradouro']}{$order->address_print['complemento']}, {$order->address_print['bairro']}"); ?></span></td>
+                    <td colspan="2" class="address">
+                        <strong class="label">ENDEREÇO:</strong> 
+                        <span class="value" title="Endereço"><?php echo esc_html("{$order->address_print['logradouro']}{$order->address_print['complemento']}"); ?></span>, 
+                        <span class="value" title="Bairro"><?php echo esc_html($order->address_print['bairro']); ?></span>
+                    </td>
                 </tr>
                 <tr>
-                    <td class="city-state"><strong class="label">CIDADE/UF:</strong> <span class="value"><?php echo esc_html("{$order->address_print['cidade']} / {$order->address_print['uf']}"); ?></span></td>
-                    <td class="zip-code"><strong class="label">CEP:</strong> <span class="value"><?php echo esc_html($order->address_print['cep']); ?></span></td>
+                    <td class="city-state">
+                        <strong class="label">CIDADE/UF:</strong> 
+                        <span class="value" title="Cidade"><?php echo esc_html($order->address_print['cidade']); ?></span> / 
+                        <span class="value" title="Estado"><?php echo esc_html($order->address_print['uf']); ?></span>
+                    </td>
+                    <td class="zip-code"><strong class="label">CEP:</strong> <span class="value" title="CEP"><?php echo esc_html($order->address_print['cep']); ?></span></td>
                 </tr>
             </table>
             <!-- lista de itens -->
@@ -1364,6 +1350,10 @@ class SWP_Print_Orders {
             gap: 2mm;
             justify-content: space-between;
         }
+        .empty-data {
+            color: red;
+            text-transform: uppercase;
+        }
         .destinatario .shipping-method {
             border: 2px solid #000;
             border-radius: 2mm;
@@ -1399,6 +1389,11 @@ class SWP_Print_Orders {
             height: 22mm;
             padding: 0 0 2mm;
             line-height: 11pt;
+        }
+        .invoice-client .value:empty:before,
+        .destinatario .address > span:empty:before {
+            content: attr(title) ' VAZIO';
+            color: red;
         }
         .destinatario .address .name {
             font-weight: bold;
@@ -1584,8 +1579,9 @@ class SWP_Print_Orders {
             .no-print {
                 display: none;
             }
-            
-            .empty-data {
+
+            .invoice-client .value:empty:before,
+            .destinatario .address > span:empty:before {
                 display: none;
             }
 
@@ -1779,11 +1775,11 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
             <div class='destinatario'>
                 <div class='address'>
                     <img class='destinatario-label' src='<?php echo esc_url($this->label_destinatario); ?>' alt='' />
-                    <span class='name'><?php echo esc_html($this->address['nome']); ?></span> <span class='company'><?php echo esc_html($this->address['empresa']); ?></span><br />
-                    <span class='street'><?php echo esc_html("{$this->address['logradouro']}{$this->address['complemento']}"); ?></span><br />
-                    <span class='neighbor'><?php echo esc_html($this->address['bairro']); ?></span>
+                    <span class='name' title="Nome"><?php echo esc_html($this->address['nome']); ?></span> <span class='company' title="Empresa"><?php echo esc_html($this->address['empresa']); ?></span><br />
+                    <span class='street' title="Endereço"><?php echo esc_html("{$this->address['logradouro']}{$this->address['complemento']}"); ?></span><br />
+                    <span class='neighbor' title="Bairro"><?php echo esc_html($this->address['bairro']); ?></span>
                     <br />
-                    <strong class='cep'><?php echo esc_html($this->address['cep']); ?></strong> <span class='city'><?php echo esc_html($this->address['cidade']); ?></span> / <span class='state'><?php echo esc_html($this->address['uf']); ?></span>
+                    <strong class='cep' title="CEP"><?php echo esc_html($this->address['cep']); ?></strong> <span class='city' title="Cidade"><?php echo esc_html($this->address['cidade']); ?></span> / <span class='state' title="Estado"><?php echo esc_html($this->address['uf']); ?></span>
                 </div>
                 <div class='images'>
                     <div class='barcode'>
