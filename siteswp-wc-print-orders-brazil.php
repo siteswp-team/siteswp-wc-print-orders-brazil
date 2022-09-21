@@ -605,9 +605,12 @@ class SWP_Print_Orders {
     protected function print_order( $order ){
         
         $address = $order->address_print;
-        
-        $generator = new \Picqer\Barcode\BarcodeGeneratorJPG();
-        $barcode = base64_encode($generator->getBarcode($address['cep'], $generator::TYPE_CODE_128, $this->barcode_config['width_factor'], $this->barcode_config['height']));
+
+        $barcode = '';
+        if( !empty($address['cep']) ){
+            $generator = new \Picqer\Barcode\BarcodeGeneratorJPG();
+            $barcode = base64_encode($generator->getBarcode($address['cep'], $generator::TYPE_CODE_128, $this->barcode_config['width_factor'], $this->barcode_config['height']));
+        }
         
         // Etiqueta individual
         $label  = new SWP_Print_Order_Label_2x2( $order, $address, $barcode, $this->store_info );
@@ -1787,12 +1790,14 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
                         <?php
                         // Permitir apenas imagens para o código de barras
                         // O terceiro parâmetro data em wp_kses permite o uso de imagem base64
-                        $allowed = [
-                            'img' => [
-                                'src' => []
-                            ]
-                        ];
-                        echo wp_kses("<img src='data:image/png;base64,{$this->barcode}' />", $allowed, ['data']);
+                        if( !empty($this->barcode) ){
+                            $allowed = [
+                                'img' => [
+                                    'src' => []
+                                ]
+                            ];
+                            echo wp_kses("<img src='data:image/png;base64,{$this->barcode}' />", $allowed, ['data']);
+                        }
                         ?>
                     </div>
                     <?php echo wp_kses_post($this->method_img); ?>
