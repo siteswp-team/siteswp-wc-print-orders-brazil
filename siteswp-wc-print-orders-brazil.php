@@ -1694,7 +1694,7 @@ abstract class SWP_Print_Order_Label {
             $this->method_img = sprintf('<div class="shipping-method shipping-sedex"><img src="%s" alt="" /><img src="%s" alt="" /></div>', esc_url($this->logo_sedex), esc_url($this->logo_correios));
         }
         elseif( $this->has_shipping_method('correios-pac') || $this->has_shipping_method('free') ){
-            $this->method_img = sprintf('<div class="shipping-method shipping-pac"><img src="" alt="" /><img src="" alt="" /></div>', esc_url($this->logo_pac), esc_url($this->logo_correios));
+            $this->method_img = sprintf('<div class="shipping-method shipping-pac"><img src="%s" alt="" /><img src="%s" alt="" /></div>', esc_url($this->logo_pac), esc_url($this->logo_correios));
         }
         elseif( $this->has_shipping_method('local_pickup') ){
             $this->method_img = '<div class="shipping-method shipping-local-pickup"><div>retirada</div></div>';
