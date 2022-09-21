@@ -1398,6 +1398,9 @@ class SWP_Print_Orders {
             content: attr(title) ' VAZIO';
             color: red;
         }
+        .destinatario .address > span.company:empty:before {
+            display: none;
+        }
         .destinatario .address .name {
             font-weight: bold;
         }
