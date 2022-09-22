@@ -5,7 +5,7 @@
  * Description:       Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
  * Author:            SitesWP
  * Author URI:        https://siteswp.com.br/
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 5.2
  * Tested up to:      6.0
  * Requires PHP:      7.2
