@@ -57,6 +57,10 @@ Não, este plugin utiliza do recurso nativo de impressão do navegador, onde voc
 
 == Changelog ==
 
+= 1.0.2 - 2022.09.22 =
+* Correção para código de barras vazio
+* Ajuste exibição de informação 'Empresa' vazia
+
 = 1.0.1 - 2022.09.21 =
 * Correção exibição de selo de método PAC
 * Melhoria na exibição de aviso de informações vazias
