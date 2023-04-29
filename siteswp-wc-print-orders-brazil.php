@@ -27,6 +27,7 @@ include_once "vendor/autoload.php";
  */
 add_action( 'admin_footer-edit.php', array('SWP_Print_Orders', 'footer') );             // Adicionar botões de impressão nas páginas de pedido
 add_filter( 'woocommerce_general_settings', 'swp_print_orders_add_shop_cnpj_cpf' );     // Adicionar CPF/CNPJ para opções da loja
+add_action( 'customize_register', 'swp_print_order_customizer' );                       // Adicionar campo de logo da loja no customizer
 
 /**
  * Adicionar campo de CNPJ nas configurações do WooCommerce
@@ -447,6 +448,12 @@ class SWP_Print_Orders {
                     <p>Pular <input type="number" name="offset" value="<?php echo esc_attr((int)$this->offset); ?>" size="2" min="0" max="<?php echo esc_attr((int)$this->per_page - 1); ?>" /> itens no começo da impressão. <button type="submit" name="print_action" value="order_slip" class="button-primary">atualizar</button></p>
                 </fieldset>
                 <?php } ?>
+                
+                <fieldset>
+                    <legend>Opções:</legend>
+                    <a href="<?php echo admin_url('customize.php?autofocus[section]=woocommerce_etiquetas'); ?>" class="button-secondary" target="_blank">Logo da loja</a>
+                    <a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button-secondary" target="_blank">CPF/CNPJ da loja</a>
+                </fieldset>
             </div>
         </form>
         
@@ -693,6 +700,10 @@ class SWP_Print_Orders {
         
         // logo da loja
         $store_info['woocommerce_store_logo'] = $this->config['images']['logo'];
+        $custom_logo = get_option('woocommerce_etiquetas_logo');
+        if( !empty($custom_logo) ){
+            $store_info['woocommerce_store_logo'] = wp_get_attachment_url($custom_logo);
+        }
         
         $this->store_info = $store_info;
     }
@@ -1367,6 +1378,7 @@ class SWP_Print_Orders {
             flex-direction: column;
             justify-content: space-around;
             box-sizing: border-box;
+            text-align: center;
         }
         .destinatario .shipping-method.shipping-empty {
             border-color: transparent;
@@ -1386,6 +1398,21 @@ class SWP_Print_Orders {
             align-items: center;
             text-align: center;
             font-weight: bold;
+        }
+        .destinatario .shipping-impresso-normal,
+        .destinatario .shipping-impresso-urgente {
+            display: flex;
+            height: 17.2mm;
+            padding: 1.9mm 0 1mm;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .destinatario .shipping-impresso-normal > div,
+        .destinatario .shipping-impresso-urgente > div {
+            font-size: 7pt;
+            line-height: 100%;
+            text-transform: initial;
+            text-align: center;
         }
         .destinatario .address {
             font-size: 8.5pt;
@@ -1515,7 +1542,7 @@ class SWP_Print_Orders {
             margin: 0;
             padding: 10px;
             flex: 1;
-            min-width: 45%;
+            min-width: 25%;
         }
         
         #swp-print-orders fieldset p {
@@ -1701,6 +1728,15 @@ abstract class SWP_Print_Order_Label {
         elseif( $this->has_shipping_method('local_pickup') ){
             $this->method_img = '<div class="shipping-method shipping-local-pickup"><div>retirada</div></div>';
         }
+        elseif( $this->has_shipping_method('correios-impresso-normal') ){
+            $this->method_img = '<div class="shipping-method shipping-impresso-normal"><div><strong>IMPRESSO FECHADO</strong></div><div>Pode ser aberto <br />pela ECT</div><div>CORREIOS</div></div>';
+        }
+        elseif( $this->has_shipping_method('correios-impresso-urgente') ){
+            $this->method_img = '<div class="shipping-method shipping-impresso-urgente"><div><strong>IMPRESSO FECHADO</strong></div><div>Pode ser aberto <br />pela ECT</div><div>CORREIOS</div></div>';
+        }
+        elseif( $this->has_shipping_method('correios-carta') ){
+            $this->method_img = sprintf('<div class="shipping-method shipping-carta"><strong>CARTA</strong><img src="%s" alt="" /></div>', esc_url($this->logo_correios));
+        }
         else{
             $this->method_img = '<div class="shipping-method shipping-empty">&nbsp;</div>';
         }
@@ -1810,6 +1846,7 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
                 <div class='address'>
                     <strong>Remetente:<br /></strong>
                     <span class='name'><?php echo esc_html($this->store_info['blogname']); ?><br /></span> 
+                    <span class='cpf-cnpj'><?php echo esc_html($this->store_info['woocommerce_store_cpf_cnpj']); ?><br /></span> 
                     <span class='full-address'><?php echo esc_html("{$this->store_info['woocommerce_store_address']}{$this->store_info['woocommerce_store_address_2']}"); ?><br /></span>
                     <span class='zip'><?php echo esc_html($this->store_info['woocommerce_store_postcode']); ?></span> 
                     <span class='city-state'><?php echo esc_html("{$this->store_info['woocommerce_store_city']} / {$this->store_info['woocommerce_store_state']}"); ?></span>
@@ -1826,3 +1863,46 @@ class SWP_Print_Order_Label_2x2 extends SWP_Print_Order_Label {
     }
 }
 
+
+
+/**
+ * Controles de personalização para o customizer
+ * 
+ */
+function swp_print_order_customizer( $wp_customize ){
+    
+    $wp_customize->add_section(
+        'woocommerce_etiquetas',
+        array(
+            'title'       => 'Etiquetas Correios',
+            'priority'    => 30,
+            'panel'       => 'woocommerce',
+            'description' => 'Opções das etiquetas de Correios',
+        )
+    );
+
+    $wp_customize->add_setting(
+        'woocommerce_etiquetas_logo',
+        array(
+            'default'           => '',
+            'type'              => 'option',
+            'capability'        => 'manage_woocommerce',
+        )
+    );
+
+    $wp_customize->add_control(
+        new WP_Customize_Cropped_Image_Control(
+            $wp_customize, 'woocommerce_etiquetas_logo', array(
+                'label'      => 'Logo na etiqueta',
+                'settings'   => 'woocommerce_etiquetas_logo',
+                'section'    => 'woocommerce_etiquetas',
+                'priority'   => 50,
+                'width'      => 113,  // Cropper Width
+                'height'     => 65,   // cropper Height
+                'flex_width' => false, // Flexible Width
+                'flex_height'=> false, // Flexible Heiht
+                'sanitize_callback' => 'absint',
+            )
+        )
+    );
+}
