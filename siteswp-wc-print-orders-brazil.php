@@ -7,7 +7,7 @@
  * Author URI:        https://siteswp.com.br/
  * Version:           1.0.3
  * Requires at least: 5.2
- * Tested up to:      6.0
+ * Tested up to:      6.2.2
  * Requires PHP:      7.2
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -460,7 +460,7 @@ class SWP_Print_Orders {
         <div class="preview-label no-print">
             <p><a href="javascript: window.print();" class="button-primary btn-print">IMPRIMIR</a></p>
             <h3>Visualização:</h3>
-            <p>As linhas pontilhadas não serão impressas.</p>
+            <p>As linhas pontilhadas e textos em vermelhos não serão impressas.</p>
         </div>
         
         <?php
