@@ -3,7 +3,7 @@ Contributors: siteswp, alexkoti
 Donate link: https://siteswp.com.br/contato/
 Tags: woocommerce, shipping, correios, Brasil
 Requires at least: 5.2
-Tested up to: 6.2
+Tested up to: 6.2.2
 Stable tag: 1.0.3
 Requires PHP: 7.2
 License: GPLv2 or later
@@ -65,7 +65,7 @@ Pode utilizar a área de suporte aqui no WordPress ou enviar Issue ou PR no [git
 
 == Changelog ==
 
-= 1.0.3 - 2023.04.29 =
+= 1.0.3 - 2023.05.27 =
 * Adição da informação CPF/CNPJ na etiqueta, junto ao nome do remetente
 * Possibilidade de adicionar o logo da loja na etiqueta, pelo painel "Personalizar"
 * Sinalizar na etiqueta métodos de envio impresso e carta
