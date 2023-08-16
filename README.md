@@ -9,13 +9,14 @@ Enviem feedback, report de bugs e sugestões via [issues do github](https://gith
 Ajuda: preciso de ajuda para adicionar os outros modelos de etiquetas da pimaco. Além das medidas é preciso fazer testes com as folhas impressas, para certificar que o encaixe está correto. Então quem trabalhar com os outros modelos por favor envie as configurações de layout usadas.
 
 ## ToDo
+- [ ] remover options do banco de dados ao desinstalar o plugin
 - [ ] mais modelos para etiquetas (2x3)
 - [ ] adicionar modelos de etiquetas adesivas
 - [ ] imprimir mais declarações por página
 - [ ] imprimir página apenas com remetente
 - [ ] salvar opção de modelos escolhidos, ao utilizar novamente usará as opções da sessão anterior
 - [ ] verificar nível de usuário
-- [ ] admin page para configurar opções(logo, cpf(?))
+- [x] admin page para configurar opções(logo, cpf(?))
 - [ ] adaptar interface para celulares
 - [ ] múltiplas páginas, em caso de muitos produtos na declaração
 - [ ] opção de "entrega no vizinho"

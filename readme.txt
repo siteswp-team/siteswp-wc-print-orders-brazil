@@ -3,8 +3,8 @@ Contributors: siteswp, alexkoti
 Donate link: https://siteswp.com.br/contato/
 Tags: woocommerce, shipping, correios, Brasil
 Requires at least: 5.2
-Tested up to: 6.0
-Stable tag: 1.0.2
+Tested up to: 6.3
+Stable tag: 1.0.4
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +21,10 @@ Negócios que estejam começando e ainda não possuem integração com serviços
 
 = Campos adicionais =
 Este plugin adiciona o campo "CPF/CNPJ" em WooCommerce > Configurações > aba Geral > Endereço da loja. Este campo é necessário para o preenchimento correto da declaração de conteúdo.
+
+= Personalização =
+É possível definir o logo da loja que irá aparecer na etiqueta.
+O nome da loja na etiqueta usará a mesma informação cadastrada em Configurações > Geral
 
 = Compatibilidade =
 
@@ -49,6 +53,10 @@ Não, esta integração está fora do escopo deste plugin, que é voltado para l
 
 Não, este plugin utiliza do recurso nativo de impressão do navegador, onde você poderá escolher a impressora ou "salvar como PDF".
 
+= Reportar erros ou sugestões de código =
+
+Pode utilizar a área de suporte aqui no WordPress ou enviar Issue ou PR no [github](https://github.com/siteswp-team/siteswp-wc-print-orders-brazil).
+
 == Screenshots ==
 
 1. Lista de pedidos com os botões de impressão.
@@ -56,6 +64,14 @@ Não, este plugin utiliza do recurso nativo de impressão do navegador, onde voc
 3. Página de impressão de declaração de conteúdo.
 
 == Changelog ==
+
+= 1.0.4 - 2023.08.16 =
+* Atualização pacote picqer/php-barcode-generator
+
+= 1.0.3 - 2023.05.27 =
+* Adição da informação CPF/CNPJ na etiqueta, junto ao nome do remetente
+* Possibilidade de adicionar o logo da loja na etiqueta, pelo painel "Personalizar"
+* Sinalizar na etiqueta métodos de envio impresso e carta
 
 = 1.0.2 - 2022.09.22 =
 * Correção para código de barras vazio

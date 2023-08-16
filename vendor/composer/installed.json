@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "picqer/php-barcode-generator",
-            "version": "v2.2.4",
-            "version_normalized": "2.2.4.0",
+            "version": "v2.3.3",
+            "version_normalized": "2.3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/picqer/php-barcode-generator.git",
-                "reference": "b98f110cc5a79f723688fb17fd90b9325300d844"
+                "reference": "10d3507e902058c62493fef0b9569d04634b1c8f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/picqer/php-barcode-generator/zipball/b98f110cc5a79f723688fb17fd90b9325300d844",
-                "reference": "b98f110cc5a79f723688fb17fd90b9325300d844",
+                "url": "https://api.github.com/repos/picqer/php-barcode-generator/zipball/10d3507e902058c62493fef0b9569d04634b1c8f",
+                "reference": "10d3507e902058c62493fef0b9569d04634b1c8f",
                 "shasum": ""
             },
             "require": {
@@ -27,9 +27,9 @@
                 "ext-gd": "For JPG and PNG generators, GD or Imagick is required",
                 "ext-imagick": "For JPG and PNG generators, GD or Imagick is required"
             },
-            "time": "2022-07-01T08:27:26+00:00",
+            "time": "2023-08-14T07:50:43+00:00",
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Picqer\\Barcode\\": "src"
@@ -79,7 +79,7 @@
             ],
             "support": {
                 "issues": "https://github.com/picqer/php-barcode-generator/issues",
-                "source": "https://github.com/picqer/php-barcode-generator/tree/v2.2.4"
+                "source": "https://github.com/picqer/php-barcode-generator/tree/v2.3.3"
             },
             "funding": [
                 {
