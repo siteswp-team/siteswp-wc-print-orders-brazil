@@ -1,17 +1,19 @@
 <?php
 /**
- * Plugin Name:       SitesWP Print Orders Brazil for WooCommerce
- * Plugin URI:        https://github.com/siteswp-team/siteswp-wc-print-orders-brazil
- * Description:       Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
- * Author:            SitesWP
- * Author URI:        https://siteswp.com.br/
- * Version:           1.0.3
- * Requires at least: 5.2
- * Tested up to:      6.2.2
- * Requires PHP:      7.2
- * License:           GPLv2 or later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Tags:              woocommerce, shipping, correios, brasil
+ * Plugin Name:          SitesWP Print Orders Brazil for WooCommerce
+ * Plugin URI:           https://github.com/siteswp-team/siteswp-wc-print-orders-brazil
+ * Description:          Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
+ * Author:               SitesWP
+ * Author URI:           https://siteswp.com.br/
+ * Version:              1.0.4
+ * Requires at least:    5.2
+ * Tested up to:         6.3
+ * Requires PHP:         7.2
+ * License:              GPLv2 or later
+ * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
+ * Tags:                 woocommerce, shipping, correios, brasil
+ * WC requires at least: 6.9.0
+ * WC tested up to:      8.0.2
  *
  */
 
