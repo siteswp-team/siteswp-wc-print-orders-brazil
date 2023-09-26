@@ -402,8 +402,6 @@ class SWP_Print_Orders {
             ?>
         </div>
         <?php
-        
-        die();
     }
 
     protected function help(){
