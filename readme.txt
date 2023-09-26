@@ -65,6 +65,9 @@ Pode utilizar a área de suporte aqui no WordPress ou enviar Issue ou PR no [git
 
 == Changelog ==
 
+= 1.0.5 - 2023.09.26 =
+* Ajuste de compatibilidade plugin Correios 4.1.5, mostrar selos de método de envio conforme nova versão API Correios
+
 = 1.0.4 - 2023.08.16 =
 * Atualização pacote picqer/php-barcode-generator
 
