@@ -5,7 +5,7 @@
  * Description:          Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
  * Author:               SitesWP
  * Author URI:           https://siteswp.com.br/
- * Version:              1.0.4
+ * Version:              1.0.5
  * Requires at least:    5.2
  * Tested up to:         6.3
  * Requires PHP:         7.2
@@ -1721,10 +1721,10 @@ abstract class SWP_Print_Order_Label {
     
     protected function set_method_image(){
         
-        if( $this->has_shipping_method('correios-sedex') ){
+        if( $this->has_shipping_method('correios-sedex') || $this->has_shipping_method('sedex') ){
             $this->method_img = sprintf('<div class="shipping-method shipping-sedex"><img src="%s" alt="" /><img src="%s" alt="" /></div>', esc_url($this->logo_sedex), esc_url($this->logo_correios));
         }
-        elseif( $this->has_shipping_method('correios-pac') || $this->has_shipping_method('free') ){
+        elseif( $this->has_shipping_method('correios-pac') || $this->has_shipping_method('free') || $this->has_shipping_method('pac') ){
             $this->method_img = sprintf('<div class="shipping-method shipping-pac"><img src="%s" alt="" /><img src="%s" alt="" /></div>', esc_url($this->logo_pac), esc_url($this->logo_correios));
         }
         elseif( $this->has_shipping_method('local_pickup') ){
@@ -1747,6 +1747,11 @@ abstract class SWP_Print_Order_Label {
     protected function has_shipping_method( $method_id ) {
         foreach ( $this->order->get_shipping_methods() as $shipping_method ) {
             $pos = strpos( $shipping_method['method_id'], $method_id );
+            if ( $pos !== false ) {
+                return true;
+            }
+
+            $pos = strpos( strtolower($shipping_method['method_title']), $method_id );
             if ( $pos !== false ) {
                 return true;
             }
