@@ -7,13 +7,13 @@
  * Author URI:           https://siteswp.com.br/
  * Version:              1.0.5
  * Requires at least:    5.2
- * Tested up to:         6.3
+ * Tested up to:         6.3.1
  * Requires PHP:         7.2
  * License:              GPLv2 or later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
  * Tags:                 woocommerce, shipping, correios, brasil
  * WC requires at least: 6.9.0
- * WC tested up to:      8.0.2
+ * WC tested up to:      8.1.1
  *
  */
 
