@@ -300,7 +300,7 @@ class SWP_Print_Orders {
             'woocommerce'
             , 'Imprimir Etiquetas'
             , 'Imprimir Etiquetas'
-            , 'manage_options'
+            , 'manage_woocommerce'
             , 'correios_print_orders'
             , [$this, 'render_page']
         );

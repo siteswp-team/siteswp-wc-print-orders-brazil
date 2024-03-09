@@ -65,6 +65,10 @@ Pode utilizar a área de suporte aqui no WordPress ou enviar Issue ou PR no [git
 
 == Changelog ==
 
+= 1.0.6 - 2024.03.08 =
+* Compatibilidade com HPOS
+* Ajuste de permissão para "Gerente de loja" acessar as impressões
+
 = 1.0.5 - 2023.09.26 =
 * Ajuste de compatibilidade plugin Correios 4.1.5, mostrar selos de método de envio conforme nova versão API Correios
 
