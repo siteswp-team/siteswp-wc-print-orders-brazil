@@ -24,10 +24,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 include_once "vendor/autoload.php";
 
 /**
+ * Declarar compatibilidade com HPOS
+ * 
+ */
+add_action( 'before_woocommerce_init', function(){
+    if( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ){
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+});
+
+/**
  * Hooks
  * 
  */
-add_action( 'admin_footer-edit.php', array('SWP_Print_Orders', 'footer') );             // Adicionar botões de impressão nas páginas de pedido
+add_action( 'admin_print_footer_scripts', array('SWP_Print_Orders', 'footer') );             // Adicionar botões de impressão nas páginas de pedido
 add_filter( 'woocommerce_general_settings', 'swp_print_orders_add_shop_cnpj_cpf' );     // Adicionar CPF/CNPJ para opções da loja
 add_action( 'customize_register', 'swp_print_order_customizer' );                       // Adicionar campo de logo da loja no customizer
 
@@ -972,9 +982,23 @@ class SWP_Print_Orders {
         }
     }
     
-    public static function footer(){
-        global $typenow;
-        if( $typenow != 'shop_order' ){
+    /**
+     * Exibir javascript nas páginas de listagem de pedido
+     * 
+     * O código da listagem no modo HPOS é diferente em alguns detalhes, sendo necessário interceptar as duas situações de
+     * utilização de pedidos em WP_Posts ou HPOS
+     * 
+     */
+    public static function footer( $hook_suffix ){
+
+        /**
+         * Verificar se é listagem de pedidos
+         * 'edit-shop_order'            - WP_Posts
+         * 'woocommerce_page_wc-orders' - HPOS
+         * 
+         */
+        $screen = get_current_screen();
+        if( !in_array($screen->id, ['edit-shop_order', 'woocommerce_page_wc-orders']) ){
             return;
         }
         
@@ -982,7 +1006,6 @@ class SWP_Print_Orders {
         ?>
         <script type="text/javascript">
             jQuery(document).ready(function($){
-                console.log('swp-woocommerce-print-orders');
                 // add/update querystring
                 // @link http://stackoverflow.com/a/6021027
                 function updateQueryStringParameter(uri, key, value) {
@@ -996,26 +1019,26 @@ class SWP_Print_Orders {
                     }
                 }
                 
-                $('input:checkbox[name="post[]"], #cb-select-all-1').on('change', function(){
+                $('input:checkbox[name="post[]"], input:checkbox[name="id[]"], #cb-select-all-1').on('change', function(){
                     var ids_arr = [];
-                    $('input:checkbox[name="post[]"]:checked').each(function() {
+                    $('input:checkbox[name="post[]"]:checked, input:checkbox[name="id[]"]:checked').each(function() {
                         ids_arr.push(this.value);
                     });
                     var url = updateQueryStringParameter( $('#excs-print-orders-button').attr('href'), 'oid', ids_arr.join(',') );
                     $('#excs-print-orders-button').attr('href', url);
                 });
-                $('<a href="<?php echo esc_url($url); ?>" class="button" target="_blank" id="excs-print-orders-button">Imprimir Pedidos Selecionados</a>').insertAfter('#post-query-submit');
+                $('<a href="<?php echo esc_url($url); ?>" class="button" target="_blank" id="excs-print-orders-button">Imprimir Pedidos Selecionados</a>').insertAfter('#post-query-submit, #order-query-submit');
                 
                 // botão individual
                 if( $('.column-order_number .excs-order-items').length ){
                     $('.column-order_number .excs-order-items').each(function( index ){
-                        var id = $(this).closest('tr').attr('id').replace('post-', '');
+                        var id = $(this).attr('data-order-id');
                         $('<a href="<?php echo esc_url($url); ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual">Etiqueta </a>').insertAfter( $(this) );
                     });
                 }
                 else{
                     $('.order-preview').each(function( index ){
-                        var id = $(this).closest('tr').attr('id').replace('post-', '');
+                        var id = $(this).attr('data-order-id');
                         $('<a href="<?php echo esc_url($url); ?>&oid=' + id + '" class="button print-barcode" target="_blank" title="imprimir etiqueta individual"></a>').insertAfter( $(this) );
                     });
                 }
@@ -1635,8 +1658,14 @@ class SWP_Print_Orders {
             }
 
             #adminmenumain,
-            #wpadminbar {
+            #wpadminbar,
+            #wpfooter {
                 display: none;
+            }
+            
+            /* impedir página extra em branco no final */
+            .paper:last-child {
+                page-break-after: auto;
             }
         }
         </style>
