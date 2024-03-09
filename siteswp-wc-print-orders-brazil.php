@@ -5,15 +5,15 @@
  * Description:          Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
  * Author:               SitesWP
  * Author URI:           https://siteswp.com.br/
- * Version:              1.0.5
+ * Version:              1.0.6
  * Requires at least:    5.2
- * Tested up to:         6.3.1
+ * Tested up to:         6.4.3
  * Requires PHP:         7.2
  * License:              GPLv2 or later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
  * Tags:                 woocommerce, shipping, correios, brasil
  * WC requires at least: 6.9.0
- * WC tested up to:      8.1.1
+ * WC tested up to:      8.6.1
  *
  */
 
