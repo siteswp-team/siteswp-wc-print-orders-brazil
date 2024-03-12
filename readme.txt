@@ -1,15 +1,15 @@
-=== SitesWP Print Orders Brazil for WooCommerce ===
+=== Etiqueta e declaração dos Correios para WooCommerce ===
 Contributors: siteswp, alexkoti
 Donate link: https://siteswp.com.br/contato/
 Tags: woocommerce, shipping, correios, Brasil
 Requires at least: 5.2
-Tested up to: 6.3
-Stable tag: 1.0.4
+Tested up to: 6.4.3
+Stable tag: 1.0.7
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce.
+Imprimir etiquetas de pedidos e declaração de conteúdo para os Correios do Brasil, para pedidos gerados no WooCommerce. Criado por SitesWP.
 
 == Description ==
 
@@ -64,6 +64,16 @@ Pode utilizar a área de suporte aqui no WordPress ou enviar Issue ou PR no [git
 3. Página de impressão de declaração de conteúdo.
 
 == Changelog ==
+
+= 1.0.7 - 2024.03.11 =
+* Tradução do nome do plugin para PT-BR
+
+= 1.0.6 - 2024.03.08 =
+* Compatibilidade com HPOS
+* Ajuste de permissão para "Gerente de loja" acessar as impressões
+
+= 1.0.5 - 2023.09.26 =
+* Ajuste de compatibilidade plugin Correios 4.1.5, mostrar selos de método de envio conforme nova versão API Correios
 
 = 1.0.4 - 2023.08.16 =
 * Atualização pacote picqer/php-barcode-generator

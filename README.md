@@ -15,7 +15,7 @@ Ajuda: preciso de ajuda para adicionar os outros modelos de etiquetas da pimaco.
 - [ ] imprimir mais declarações por página
 - [ ] imprimir página apenas com remetente
 - [ ] salvar opção de modelos escolhidos, ao utilizar novamente usará as opções da sessão anterior
-- [ ] verificar nível de usuário
+- [x] verificar nível de usuário
 - [x] admin page para configurar opções(logo, cpf(?))
 - [ ] adaptar interface para celulares
 - [ ] múltiplas páginas, em caso de muitos produtos na declaração
